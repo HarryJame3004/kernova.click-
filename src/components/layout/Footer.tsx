@@ -1,121 +1,100 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Globe, ArrowRight } from 'lucide-react';
+import { Mail, Globe, ArrowUpRight } from 'lucide-react';
+import { BrandLogo } from '../ui/BrandLogo';
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="border-t border-slate-200 bg-slate-50 transition-colors duration-200 dark:border-slate-800 dark:bg-slate-950">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-4 lg:gap-12">
-          {/* Brand & Purpose */}
+    <footer className="border-t border-zinc-200/80 bg-zinc-50/50 py-12 transition-colors duration-150 dark:border-zinc-850 dark:bg-zinc-950">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
+          {/* Brand Info */}
           <div className="md:col-span-1">
-            <Link to="/" className="flex items-center gap-2.5 text-lg font-bold text-slate-900 dark:text-white">
-              <span className="flex h-6 w-6 items-center justify-center rounded bg-gradient-to-br from-violet-600 to-indigo-600 text-xs font-bold text-white">
-                K
-              </span>
-              <span className="font-mono text-base tracking-wider">KERNOVA</span>
+            <Link to="/" className="inline-block" aria-label="KERNOVA Home">
+              <BrandLogo size="sm" />
             </Link>
-            <p className="mt-3 text-xs font-medium text-violet-600 dark:text-violet-400">
+            <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400 font-mono">
               Build Beyond Limits.
             </p>
-            <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-              Developing a Linux-first developer workspace for C/C++ build workflows, compiler diagnostics, and debugging assistance.
+            <p className="mt-2 text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">
+              Linux-first developer workspace for C/C++ build workflows, compiler diagnostics, and debugging.
             </p>
-            <div className="mt-4 flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
-              <span className="inline-flex items-center gap-1">
-                <Globe className="h-3.5 w-3.5 text-slate-400" />
-                <span>kernova.click</span>
-              </span>
+            <div className="mt-4 flex items-center gap-2 font-mono text-xs text-zinc-500">
+              <span>kernova.click</span>
               <span>·</span>
               <a
                 href="mailto:contact@kernova.click"
-                className="inline-flex items-center gap-1 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
+                className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
               >
-                <Mail className="h-3.5 w-3.5 text-slate-400" />
-                <span>contact@kernova.click</span>
+                contact@kernova.click
               </a>
             </div>
           </div>
 
-          {/* Navigation - Product & Tech */}
+          {/* Navigation - Product */}
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-900 dark:text-slate-200">
-              Product & Technology
+            <h3 className="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-900 dark:text-zinc-200">
+              Product
             </h3>
-            <ul className="mt-3 space-y-2 text-xs text-slate-600 dark:text-slate-400">
+            <ul className="mt-3 space-y-2 text-xs text-zinc-600 dark:text-zinc-400">
               <li>
-                <Link to="/product" className="hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
-                  Developer Workspace
+                <Link to="/product" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
+                  Overview & Capabilities
                 </Link>
               </li>
               <li>
-                <Link to="/product#compiler-diagnostics" className="hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
-                  Compiler Diagnostics
+                <Link to="/technology" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
+                  System Architecture
                 </Link>
               </li>
               <li>
-                <Link to="/product#build-workflows" className="hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
-                  C/C++ Build Orchestration
-                </Link>
-              </li>
-              <li>
-                <Link to="/technology" className="hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
-                  Linux-First Architecture
-                </Link>
-              </li>
-              <li>
-                <Link to="/technology#privacy" className="hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
-                  Developer Privacy Principles
+                <Link to="/technology#privacy" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
+                  Privacy Principles
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Company & Roadmap */}
+          {/* Company */}
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-900 dark:text-slate-200">
-              Startup & Progress
+            <h3 className="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-900 dark:text-zinc-200">
+              Project
             </h3>
-            <ul className="mt-3 space-y-2 text-xs text-slate-600 dark:text-slate-400">
+            <ul className="mt-3 space-y-2 text-xs text-zinc-600 dark:text-zinc-400">
               <li>
-                <Link to="/about" className="hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+                <Link to="/about" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
                   About Kernova
                 </Link>
               </li>
               <li>
-                <Link to="/about#mission" className="hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
-                  Mission & Philosophy
+                <Link to="/roadmap" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
+                  5-Phase Roadmap
                 </Link>
               </li>
               <li>
-                <Link to="/roadmap" className="hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
-                  Engineering Roadmap
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
-                  Inquiries & Early Access
+                <Link to="/contact" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
+                  Contact Alpha Team
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Legal & Status Notice */}
+          {/* Status & Legal */}
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-900 dark:text-slate-200">
-              Early Stage Status
+            <h3 className="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-900 dark:text-zinc-200">
+              Status & Legal
             </h3>
-            <p className="mt-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-              Kernova is currently in its early-stage research and MVP prototype phase. All preview interfaces represent concepts and active development goals.
+            <p className="mt-3 text-xs leading-relaxed text-zinc-500">
+              Kernova is currently an early-stage startup developing its initial MVP prototype.
             </p>
-            <div className="mt-4 space-y-2 text-xs text-slate-500 dark:text-slate-400">
+            <div className="mt-3 space-y-1.5 text-xs text-zinc-500">
               <div>
-                <Link to="/privacy" className="hover:text-slate-900 dark:hover:text-slate-200 transition-colors underline">
+                <Link to="/privacy" className="hover:text-zinc-900 dark:hover:text-zinc-100 underline transition-colors">
                   Privacy Policy (Draft)
                 </Link>
               </div>
               <div>
-                <Link to="/terms" className="hover:text-slate-900 dark:hover:text-slate-200 transition-colors underline">
+                <Link to="/terms" className="hover:text-zinc-900 dark:hover:text-zinc-100 underline transition-colors">
                   Terms of Service (Draft)
                 </Link>
               </div>
@@ -123,20 +102,10 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-6 sm:flex-row dark:border-slate-800/80">
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            © {new Date().getFullYear()} KERNOVA. All rights reserved. Built for Linux systems engineers.
-          </p>
-          <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
-            <span className="font-mono text-[11px] text-slate-400 dark:text-slate-400">
-              Domain: kernova.click
-            </span>
-            <span>·</span>
-            <Link to="/contact" className="hover:text-violet-600 dark:hover:text-violet-400 transition-colors inline-flex items-center gap-1">
-              <span>Contact Alpha Team</span>
-              <ArrowRight className="h-3 w-3" />
-            </Link>
+        <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-zinc-200/80 pt-6 sm:flex-row dark:border-zinc-850 text-xs text-zinc-500">
+          <p>© {new Date().getFullYear()} KERNOVA. All rights reserved.</p>
+          <div className="flex items-center gap-3 font-mono text-[11px]">
+            <span>Linux-First C/C++ Developer Infrastructure</span>
           </div>
         </div>
       </div>

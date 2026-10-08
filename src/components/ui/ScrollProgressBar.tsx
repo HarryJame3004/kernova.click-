@@ -33,10 +33,10 @@ export const ScrollProgressBar: React.FC = () => {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed top-0 left-0 right-0 z-50 h-[2.5px] bg-transparent"
+      className="pointer-events-none fixed top-0 left-0 right-0 z-50 h-[2px] bg-transparent"
     >
       <div
-        className="h-full w-full bg-gradient-to-r from-violet-600 via-indigo-500 to-cyan-400 transition-transform duration-75 ease-out shadow-sm shadow-violet-500/20"
+        className="h-full w-full bg-zinc-900 dark:bg-zinc-100 transition-transform duration-75 ease-out"
         style={{
           transform: `scaleX(${scrollProgress})`,
           transformOrigin: '0% 50%',

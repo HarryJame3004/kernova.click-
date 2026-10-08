@@ -17,20 +17,20 @@ import { SEOHead } from './components/ui/SEOHead';
 const NotFoundPage: React.FC = () => (
   <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
     <SEOHead title="Page Not Found — KERNOVA" />
-    <span className="font-mono text-xs font-semibold text-violet-600 dark:text-violet-400">404 ERROR</span>
-    <h1 className="mt-2 text-3xl font-extrabold text-slate-900 dark:text-white sm:text-4xl">
+    <span className="font-mono text-xs font-semibold text-zinc-500">404 ERROR</span>
+    <h1 className="mt-2 text-2xl font-bold text-zinc-900 dark:text-zinc-100 sm:text-3xl">
       Page Not Found
     </h1>
-    <p className="mt-3 max-w-md text-sm text-slate-600 dark:text-slate-400">
+    <p className="mt-2 max-w-sm text-xs text-zinc-500">
       The requested URL does not exist on the Kernova site.
     </p>
-    <div className="mt-6">
+    <div className="mt-5">
       <Link
         to="/"
-        className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-violet-500"
+        className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
       >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        <span>Return to Homepage</span>
+        <ArrowLeft className="h-3 w-3" />
+        <span>Return to Overview</span>
       </Link>
     </div>
   </div>
@@ -40,7 +40,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
-        <div className="min-h-screen flex flex-col bg-white text-slate-900 transition-colors duration-200 dark:bg-slate-950 dark:text-slate-100">
+        <div className="min-h-screen flex flex-col bg-white text-zinc-900 transition-colors duration-150 dark:bg-zinc-950 dark:text-zinc-100">
           <Navbar />
           <main className="flex-1">
             <Routes>

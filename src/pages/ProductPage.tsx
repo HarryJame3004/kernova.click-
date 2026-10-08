@@ -6,14 +6,10 @@ import {
   GitBranch, 
   Layers, 
   Bug, 
-  BrainCircuit, 
   ArrowRight, 
-  CheckCircle2, 
-  Clock, 
-  Sparkles,
-  Shield,
-  Zap,
-  ChevronRight
+  Check, 
+  ArrowUpRight,
+  Shield
 } from 'lucide-react';
 import { SEOHead } from '../components/ui/SEOHead';
 import { CodeWindow } from '../components/ui/CodeWindow';
@@ -24,22 +20,22 @@ const capabilities: FeatureCapability[] = [
   {
     id: 'compiler-diagnostics',
     title: 'Compiler Error Explanation',
-    subtitle: 'Translating template cascades into plain English and code diffs',
+    subtitle: 'Translating template cascades into concise causes and code diffs',
     status: 'In Development',
     plannedPhase: 'Phase 1 MVP & Phase 2',
     description:
-      'C++ template metaprogramming, concepts, and SFINAE errors routinely generate dozens of cryptic lines for a single mismatched argument. Kernova parses the raw AST diagnostic stream from GCC and Clang, isolates the exact unmet requirement, and provides a concise root cause alongside an actionable code diff.',
+      'C++ template metaprogramming, concepts, and SFINAE errors routinely generate dozens of cryptic lines for a single mismatched argument. Kernova parses the structured diagnostic stream from GCC and Clang, isolates the unmet requirement, and provides a concise root cause alongside an actionable code diff.',
     technicalDetails: [
-      'Clang -fdiagnostics-format=json and GCC 10+ JSON output parsing',
-      'AST-level symbol unmangling and template constraint tree normalization',
-      'Instant line-by-line diff recommendations for quick remediation',
-      'Zero hallucination: diagnostic causes verified against compiler AST nodes',
+      'Clang -fdiagnostics-format=json and GCC JSON output parsing',
+      'AST-level symbol demangling and constraint tree normalization',
+      'Line-by-line diff recommendations for rapid remediation',
+      'Deterministic analysis verified against compiler AST nodes',
     ],
   },
   {
     id: 'build-workflows',
     title: 'C/C++ Build Workflow Management',
-    subtitle: 'End-to-end visualization of CMake, Ninja, and Make graphs',
+    subtitle: 'Profiling CMake, Ninja, and Make target graphs',
     status: 'In Development',
     plannedPhase: 'Phase 2',
     description:
@@ -48,34 +44,34 @@ const capabilities: FeatureCapability[] = [
       'CMake File-API integration for real-time target configuration inspection',
       'Ninja build log profiler showing wall-clock latency per translation unit',
       'Transitive header dependency graph analyzer to detect compile-time bloat',
-      'Automated suggestions for forward declarations and unity build grouping',
+      'Suggestions for forward declarations and compilation target restructuring',
     ],
   },
   {
     id: 'linux-integration',
-    title: 'Linux Development Environment Integration',
-    subtitle: 'Native tooling for POSIX toolchains, containers, and sysroots',
+    title: 'Linux Environment Integration',
+    subtitle: 'Native support for POSIX toolchains, containers, and sysroots',
     status: 'In Development',
     plannedPhase: 'Phase 1 MVP',
     description:
-      'Designed exclusively for the Linux operating system from day one. Kernova interacts directly with host compiler packages, cross-compilation toolchains, sysroots, and Docker/Podman devcontainers without clunky virtualization layers or cross-platform compromises.',
+      'Designed exclusively for the Linux operating system from day one. Kernova interacts directly with host compiler packages, cross-compilation toolchains, sysroots, and Docker/Podman devcontainers without clunky virtualization layers.',
     technicalDetails: [
-      'Zero-latency UNIX domain socket daemon running natively on Linux',
-      'Seamless mounting and detection of Devcontainer and Podman environments',
-      'Sysroot and cross-compilation target awareness (x86_64, aarch64, riscv64)',
-      'Respects Linux desktop standards (XDG Base Directory, terminal PTY standards)',
+      'Lightweight daemon running natively on Linux via UNIX domain socket IPC',
+      'Detection and support for containerized devcontainers and Podman setups',
+      'Sysroot and cross-compilation awareness (x86_64, aarch64, riscv64)',
+      'Adheres to Linux desktop and terminal standards (XDG directories, PTY)',
     ],
   },
   {
     id: 'debugging-assistance',
     title: 'Debugging Assistance',
-    subtitle: 'GDB/LLDB and Sanitizer output triage and crash-site analysis',
+    subtitle: 'GDB/LLDB and sanitizer report triage and crash-site analysis',
     status: 'Planned',
     plannedPhase: 'Phase 3',
     description:
-      'Runtime memory errors are notoriously difficult to track. Kernova ingests crash reports from AddressSanitizer (ASan), UndefinedBehaviorSanitizer (UBSan), and Valgrind, correlating memory allocation sites with crash addresses to present an intuitive explanation of buffer overflows, use-after-free conditions, and race conditions.',
+      'Runtime memory errors are notoriously difficult to track down. Kernova ingests crash reports from AddressSanitizer (ASan), UndefinedBehaviorSanitizer (UBSan), and Valgrind, correlating memory allocation sites with crash addresses to present an intuitive explanation of buffer overflows and use-after-free defects.',
     technicalDetails: [
-      'Automated ASan shadow memory and stack allocation site demystification',
+      'ASan shadow memory and stack allocation site demystification',
       'GDB and LLDB MI (Machine Interface) protocol session bridging',
       'Core dump crash-site disassembly with corresponding source line matching',
       'Thread race condition pattern identification from ThreadSanitizer (TSan)',
@@ -88,12 +84,12 @@ const capabilities: FeatureCapability[] = [
     status: 'Planned',
     plannedPhase: 'Phase 3 & Phase 5',
     description:
-      'Unlike generic chatbots that guess code solutions blindly, Kernova’s planned AI capabilities will be tightly grounded in structural AST context and compiler outputs. Developers will be able to query complex legacy C codebases, ask for idiomatic modern C++20/23 refactoring suggestions, and inspect system call implications with guaranteed local privacy.',
+      'Unlike generic chatbots that guess code solutions blindly, Kernova’s planned AI capabilities will be tightly grounded in structural AST context and compiler outputs. Developers will be able to query complex legacy C codebases and inspect system call implications with local privacy preserved.',
     technicalDetails: [
       'Grounded retrieval augmented by compile_commands.json and AST index',
       'Local model execution via llama.cpp / ONNX runtime for air-gapped environments',
-      'Strict privacy boundaries: zero proprietary source code uploaded to external servers',
-      'Focus on technical accuracy over conversational chattiness',
+      'Local-first privacy boundaries: source code processed on user hardware',
+      'Focus on technical accuracy over conversational chat',
     ],
   },
 ];
@@ -111,31 +107,24 @@ export const ProductPage: React.FC = () => {
         canonicalPath="/product"
       />
 
-      {/* Product Hero */}
-      <section className="relative overflow-hidden pt-12 pb-16 sm:pt-20 sm:pb-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      {/* Header */}
+      <section className="pt-16 pb-12 sm:pt-20 sm:pb-16">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            {/* Unboxed metadata tag */}
-            <div className="flex items-center justify-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
-              <span className="text-violet-600 dark:text-violet-400 font-semibold">Core Product</span>
-              <span aria-hidden="true">·</span>
-              <span>Linux-First Architecture</span>
-              <span aria-hidden="true">·</span>
-              <span className="text-amber-600 dark:text-amber-400 font-semibold">In Active Prototype</span>
+            <div className="inline-flex items-center gap-2 text-xs font-mono text-zinc-500 dark:text-zinc-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              <span>KERNOVA DEVELOPER WORKSPACE</span>
+              <span className="text-zinc-400 dark:text-zinc-600">/</span>
+              <span>PRODUCT OVERVIEW</span>
             </div>
 
-            <h1 className="mt-5 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl sm:leading-tight dark:text-white [text-wrap:balance]">
-              Kernova Developer Workspace
+            <h1 className="mt-4 text-3xl font-bold tracking-tight text-zinc-900 sm:text-5xl dark:text-zinc-100 [text-wrap:balance]">
+              Designed for low-level systems engineering.
             </h1>
 
-            <p className="mt-6 text-base leading-relaxed text-slate-600 sm:text-lg dark:text-slate-300 [text-wrap:balance]">
-              A specialized developer environment built specifically for systems programmers. Bridging the gap between raw compiler toolchains and modern interactive developer ergonomics on Linux.
+            <p className="mt-4 text-sm sm:text-base leading-relaxed text-zinc-600 dark:text-zinc-400 [text-wrap:balance]">
+              A specialized developer environment built to bridge the gap between raw compiler toolchains and modern interactive developer ergonomics on Linux.
             </p>
-
-            <div className="mt-6 flex items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-              <span className="font-semibold text-slate-700 dark:text-slate-300">Status:</span>
-              <span>Initial MVP currently in active engineering. Feature details represent our current and planned roadmap.</span>
-            </div>
           </div>
 
           {/* Interactive Workspace Mockup */}
@@ -147,25 +136,22 @@ export const ProductPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 5 Core Capabilities Deep Dive */}
-      <section className="border-t border-slate-200/80 bg-slate-50/50 py-20 transition-colors dark:border-slate-800/80 dark:bg-slate-950/60 sm:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-3xl text-center">
-            <span className="text-xs font-semibold uppercase tracking-wider text-violet-600 dark:text-violet-400">
-              Detailed Product Capabilities
-            </span>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white [text-wrap:balance]">
-              Five Pillars of the Kernova Workspace
+      {/* 5 Pillars Section */}
+      <section className="border-t border-zinc-200/80 bg-zinc-50/60 py-16 dark:border-zinc-850 dark:bg-zinc-950/60 sm:py-20">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-100">
+              Core Capabilities
             </h2>
-            <p className="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-              Each capability addresses a specific, long-standing bottleneck in low-level systems programming.
+            <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
+              Each capability addresses a specific, long-standing bottleneck in low-level development.
             </p>
           </div>
 
-          {/* Capability Selector & Detail Grid */}
-          <div className="mt-14 grid grid-cols-1 gap-8 lg:grid-cols-12">
+          {/* Selector & Detail Grid */}
+          <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-12">
             {/* Left Column: Capability List */}
-            <div className="space-y-3 lg:col-span-5">
+            <div className="space-y-2 lg:col-span-5">
               {capabilities.map((cap, index) => {
                 const isSelected = cap.id === selectedCapabilityId;
                 return (
@@ -173,31 +159,22 @@ export const ProductPage: React.FC = () => {
                     key={cap.id}
                     type="button"
                     onClick={() => setSelectedCapabilityId(cap.id)}
-                    className={`w-full rounded-xl border p-4 text-left transition-all duration-150 ${
+                    className={`w-full rounded-lg border p-3.5 text-left transition-all ${
                       isSelected
-                        ? 'border-violet-600 bg-white shadow-md dark:border-violet-500 dark:bg-slate-900'
-                        : 'border-slate-200 bg-white/70 hover:border-slate-300 dark:border-slate-800/80 dark:bg-slate-900/40 dark:hover:border-slate-700'
+                        ? 'border-zinc-900 bg-white shadow-xs dark:border-zinc-200 dark:bg-zinc-900'
+                        : 'border-zinc-200/80 bg-white/70 hover:border-zinc-300 dark:border-zinc-800/80 dark:bg-zinc-900/30 dark:hover:border-zinc-700'
                     }`}
                   >
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-mono font-bold text-violet-600 dark:text-violet-400">
-                        0{index + 1}
-                      </span>
-                      {/* Status indicator: Unboxed text */}
-                      <span
-                        className={`text-[11px] font-semibold ${
-                          cap.status === 'In Development'
-                            ? 'text-amber-600 dark:text-amber-400'
-                            : 'text-slate-500 dark:text-slate-400'
-                        }`}
-                      >
+                    <div className="flex items-center justify-between font-mono text-[11px]">
+                      <span className="font-semibold text-zinc-500">0{index + 1}</span>
+                      <span className={cap.status === 'In Development' ? 'text-amber-600 dark:text-amber-400' : 'text-zinc-500'}>
                         {cap.status}
                       </span>
                     </div>
-                    <h3 className="mt-2 text-sm font-bold text-slate-900 dark:text-white">
+                    <h3 className="mt-1 text-xs font-bold text-zinc-900 dark:text-zinc-100">
                       {cap.title}
                     </h3>
-                    <p className="mt-1 line-clamp-2 text-xs text-slate-500 dark:text-slate-400">
+                    <p className="mt-0.5 line-clamp-1 text-[11px] text-zinc-500 dark:text-zinc-400">
                       {cap.subtitle}
                     </p>
                   </button>
@@ -206,78 +183,74 @@ export const ProductPage: React.FC = () => {
             </div>
 
             {/* Right Column: Detailed Capability Breakdown */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:col-span-7 sm:p-8">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-4 dark:border-slate-800">
+            <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-xs dark:border-zinc-800 dark:bg-zinc-900/50 lg:col-span-7 sm:p-7">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-100 pb-4 dark:border-zinc-800/80">
                 <div>
-                  <span className="text-xs font-semibold text-violet-600 dark:text-violet-400">
+                  <span className="font-mono text-xs text-zinc-500 dark:text-zinc-400">
                     {selectedCapability.plannedPhase}
                   </span>
-                  <h3 className="mt-1 text-xl font-bold text-slate-900 dark:text-white sm:text-2xl">
+                  <h3 className="mt-1 text-lg font-bold text-zinc-900 dark:text-zinc-100 sm:text-xl">
                     {selectedCapability.title}
                   </h3>
                 </div>
-                <div className="text-xs">
-                  <span className="rounded-md bg-slate-100 px-2.5 py-1 font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                    {selectedCapability.status}
-                  </span>
+                <div className="font-mono text-xs rounded border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-zinc-600 dark:border-zinc-800 dark:bg-zinc-850 dark:text-zinc-300">
+                  {selectedCapability.status}
                 </div>
               </div>
 
-              <p className="mt-6 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+              <p className="mt-5 text-xs sm:text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
                 {selectedCapability.description}
               </p>
 
-              <div className="mt-8">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-200">
-                  Technical Specifications & Architecture
+              <div className="mt-6">
+                <h4 className="font-mono text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-200">
+                  Technical Architecture
                 </h4>
-                <ul className="mt-4 space-y-3">
+                <ul className="mt-3 space-y-2.5">
                   {selectedCapability.technicalDetails.map((detail, idx) => (
-                    <li key={idx} className="flex items-start gap-3 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-violet-600 dark:text-violet-400" />
+                    <li key={idx} className="flex items-start gap-2.5 text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                      <Check className="h-3.5 w-3.5 text-zinc-700 dark:text-zinc-300 mt-0.5 shrink-0" />
                       <span>{detail}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
-              <div className="mt-8 rounded-xl border border-slate-100 bg-slate-50/70 p-4 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-950/50 dark:text-slate-400">
-                <div className="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-200">
-                  <Shield className="h-4 w-4 text-violet-500" />
-                  <span>Engineering Honesty Notice</span>
+              <div className="mt-6 rounded-md border border-zinc-200 bg-zinc-50/80 p-3.5 text-[11px] font-mono text-zinc-500 dark:border-zinc-800 dark:bg-zinc-950/60 dark:text-zinc-400">
+                <div className="flex items-center gap-1.5 font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                  <Shield className="h-3.5 w-3.5 text-zinc-500" />
+                  <span>EARLY-STAGE SPECIFICATION</span>
                 </div>
-                <p className="mt-1 leading-relaxed">
-                  Kernova Developer Workspace is currently in early-stage MVP development. The capabilities described above reflect our precise technical specification and active prototype build, not a released commercial product.
-                </p>
+                The capabilities described above represent active technical objectives and prototype implementations, not a finalized commercial release.
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Call to Action for Early Feedback */}
-      <section className="py-16 text-center sm:py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl">
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
-              Interested in shaping the MVP?
+      {/* CTA */}
+      <section className="py-16 text-center border-t border-zinc-200/80 dark:border-zinc-850">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-xl">
+            <h2 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-2xl">
+              Shape our early development
             </h2>
-            <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
-              We are working directly with low-level systems programmers to refine our compiler diagnostic engine. Share your toughest compilation bottlenecks with us.
+            <p className="mt-2 text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
+              Share your team’s most painful compilation bottlenecks with our founding engineering team.
             </p>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <Link
                 to="/contact"
-                className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-violet-500"
+                className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
               >
-                <span>Contact Early Access Team</span>
-                <ArrowRight className="h-4 w-4" />
+                <span>Request Early Access</span>
+                <ArrowUpRight className="h-3.5 w-3.5 opacity-70" />
               </Link>
               <Link
                 to="/roadmap"
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-700"
+                className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-4 py-2 text-xs font-medium text-zinc-700 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:text-white"
               >
-                <span>View Full Roadmap</span>
+                <span>View Roadmap</span>
               </Link>
             </div>
           </div>

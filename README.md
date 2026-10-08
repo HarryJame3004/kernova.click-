@@ -36,7 +36,9 @@ This repository contains the complete corporate website built with **React, Type
 │   │   │   ├── Navbar.tsx    # 3-Zone Top Bar with theme toggle & mobile drawer
 │   │   │   └── Footer.tsx    # Footer with email, domain, legal, and roadmap links
 │   │   └── ui/
+│   │       ├── BrandLogo.tsx        # Distinctive geometric Kernova glyph and wordmark
 │   │       ├── CodeWindow.tsx       # Interactive C/C++ diagnostic workspace prototype
+│   │       ├── ScrollProgressBar.tsx # Minimal viewport scroll progress indicator
 │   │       ├── SEOHead.tsx          # Dynamic document title & OpenGraph synchronizer
 │   │       └── WorkflowDiagram.tsx  # 4-stage Linux build-to-remediation visualizer
 │   ├── context/
