@@ -1,0 +1,6 @@
+{
+  "name": "KERNOVA - Build Beyond Limits",
+  "description": "Linux-first developer workspace for modern C/C++ workflows, compiler diagnostics, and AI-assisted debugging.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
