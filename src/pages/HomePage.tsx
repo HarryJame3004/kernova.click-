@@ -1,214 +1,356 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Terminal, Cpu, Shield, ArrowUpRight, Check } from 'lucide-react';
+import { 
+  ArrowRight, 
+  Terminal, 
+  Cpu, 
+  Shield, 
+  ArrowUpRight, 
+  Check, 
+  Layers, 
+  Zap, 
+  FileCode, 
+  GitBranch, 
+  Bug, 
+  Binary,
+  Code2,
+  Workflow
+} from 'lucide-react';
 import { SEOHead } from '../components/ui/SEOHead';
 import { CodeWindow } from '../components/ui/CodeWindow';
 import { WorkflowDiagram } from '../components/ui/WorkflowDiagram';
 
 export const HomePage: React.FC = () => {
+  const [activeAnatomyStep, setActiveAnatomyStep] = useState(0);
+
+  const anatomySteps = [
+    {
+      step: '01',
+      title: 'Compiler Process Hook',
+      input: 'Clang / GCC stderr stream',
+      mechanism: 'Intercepts structured JSON diagnostics via POSIX FIFO pipe or -fdiagnostics-format=json without modifying your build system.',
+      transformation: 'Raw binary/text stream -> Structured Diagnostic Records',
+      snippet: `{"kind": "error", "message": "no matching function for call to 'process_contiguous_batch'", "locations": [{"caret": {"line": 142, "column": 5}}]}`,
+    },
+    {
+      step: '02',
+      title: 'AST Symbol Normalization',
+      input: 'LibClang AST Definitions',
+      mechanism: 'Resolves mangled symbols, evaluates template substitution failures, and matches failed concepts against the AST constraint tree.',
+      transformation: 'Deeply nested substitution notes -> Normalized concept tree',
+      snippet: `ConceptEvaluator: ContiguousBuffer<std::vector<Task>>
+  ↳ Requires: std::is_trivially_copyable_v<Task> == true
+  ↳ Evaluated: false (Declaration at include/task.hpp:24)`,
+    },
+    {
+      step: '03',
+      title: 'Constraint Synthesis',
+      input: 'Synthesizer Engine',
+      mechanism: 'Isolates the root conflict from secondary noise. Generates a natural-language diagnostic explanation with direct line references.',
+      transformation: 'Diagnostic noise -> Root cause isolation',
+      snippet: `Diagnosis: struct Task declares custom copy constructor, invalidating trivial copyability required by concept ContiguousBuffer.`,
+    },
+    {
+      step: '04',
+      title: 'Actionable Code Diff',
+      input: 'Remediation Engine',
+      mechanism: 'Synthesizes an exact, verifiable line diff that restores concept compatibility or fixes boundary overflow.',
+      transformation: 'Diagnosis -> Verified patch proposal',
+      snippet: `- Task(const Task& other) : task_id(other.task_id) {}
++ Task(const Task&) = default; // Restores trivial copyability`,
+    },
+  ];
+
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col bg-zinc-950 text-zinc-100 min-h-screen">
       <SEOHead
-        title="KERNOVA — Linux-First C/C++ Developer Workspace"
+        title="KERNOVA — Linux C/C++ Developer Workspace"
         description="Kernova translates C and C++ compiler cascades, build bottlenecks, and memory crashes into clear, actionable diagnostics. Build Beyond Limits."
         canonicalPath="/"
       />
 
-      {/* Hero Section */}
-      <section className="relative pt-16 pb-16 sm:pt-24 sm:pb-20">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      {/* Hero Section: Precision Engineering Aesthetic */}
+      <section className="relative pt-14 pb-20 sm:pt-20 sm:pb-28 border-b border-zinc-900 bg-grid-subtle">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {/* Top Hero Composition */}
           <div className="mx-auto max-w-3xl text-center">
-            {/* Minimal unboxed status eyebrow */}
-            <div className="inline-flex items-center gap-2 text-xs font-mono text-zinc-500 dark:text-zinc-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              <span>KERNOVA DEVELOPER WORKSPACE</span>
-              <span className="text-zinc-400 dark:text-zinc-600">/</span>
-              <span>IN ACTIVE DEVELOPMENT</span>
+            {/* Architectural Eyebrow */}
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-800 bg-zinc-900/80 text-[11px] font-mono text-zinc-400 backdrop-blur-sm">
+              <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+              <span className="font-semibold text-zinc-300">LINUX C/C++ INFRASTRUCTURE</span>
+              <span className="text-zinc-600">/</span>
+              <span>EARLY-STAGE PROTOTYPE</span>
             </div>
 
-            {/* Sharp, Product-Focused Headline */}
-            <h1 className="mt-5 text-4xl font-bold tracking-tight text-zinc-900 sm:text-6xl dark:text-zinc-100 [text-wrap:balance]">
-              Turn compiler friction into clear code diffs.
+            {/* Powerful, Product-Focused Headline */}
+            <h1 className="mt-6 text-4xl sm:text-6xl font-extrabold tracking-tight text-zinc-100 [text-wrap:balance] leading-[1.1]">
+              Compiler diagnostics, decoded in real time.
             </h1>
 
-            {/* Concise Subheadline */}
-            <p className="mt-5 text-base sm:text-lg leading-relaxed text-zinc-600 dark:text-zinc-400 [text-wrap:balance]">
-              Kernova decodes C and C++ template cascades, build bottlenecks, and sanitizer crashes into actionable diagnostics. Engineered natively for Linux systems developers.
+            {/* Sharp Supporting Prose */}
+            <p className="mt-5 text-base sm:text-lg leading-relaxed text-zinc-400 [text-wrap:balance]">
+              Kernova is building a Linux-native developer workspace for C and C++. We translate cryptic template cascades, build bottlenecks, and sanitizer crashes into actionable code diffs.
             </p>
 
-            {/* Primary Action Buttons */}
+            {/* Action Group */}
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Link
                 to="/contact"
-                className="inline-flex items-center justify-center gap-1.5 rounded-md bg-zinc-900 px-4 py-2.5 text-xs font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-zinc-100 px-5 py-2.5 text-xs font-semibold text-zinc-950 transition-all hover:bg-white hover:shadow-lg hover:shadow-zinc-100/10"
               >
                 <span>Request Early Access</span>
                 <ArrowUpRight className="h-3.5 w-3.5 opacity-70" />
               </Link>
               <Link
                 to="/product"
-                className="inline-flex items-center justify-center gap-1.5 rounded-md border border-zinc-200 bg-transparent px-4 py-2.5 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-white"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/60 px-5 py-2.5 text-xs font-semibold text-zinc-300 transition-colors hover:border-zinc-700 hover:text-white"
               >
                 <span>Explore Capabilities</span>
+                <ArrowRight className="h-3.5 w-3.5 opacity-70" />
               </Link>
             </div>
 
-            {/* Quiet notice */}
-            <div className="mt-4 text-[11px] font-mono text-zinc-500 dark:text-zinc-400">
-              contact@kernova.click · No waitlist marketing · Direct feedback
+            <div className="mt-4 text-[11px] font-mono text-zinc-500">
+              contact@kernova.click · Built for Linux systems engineers · Local-first design
             </div>
           </div>
 
-          {/* Primary Visual Storytelling: Developer Workspace Centerpiece */}
-          <div className="mt-12 sm:mt-16">
-            <div className="mx-auto max-w-5xl">
+          {/* Centerpiece: Multi-Panel Developer Workspace */}
+          <div className="mt-14 sm:mt-18">
+            <div className="mx-auto max-w-6xl">
               <CodeWindow />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Problem & Solution Comparison: Clean hairline layout without candy cards */}
-      <section className="border-t border-zinc-200/80 bg-zinc-50/60 py-16 dark:border-zinc-850 dark:bg-zinc-950/60 sm:py-20">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      {/* Section 2: Interactive Error Anatomy Deconstruction */}
+      <section className="py-20 sm:py-28 border-b border-zinc-900 bg-zinc-950">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-100">
-              Why systems engineers lose focus
+            <span className="font-mono text-xs uppercase tracking-widest text-cyan-400">
+              Diagnostic Pipeline
+            </span>
+            <h2 className="mt-2 text-2xl sm:text-4xl font-bold tracking-tight text-zinc-100 [text-wrap:balance]">
+              How Kernova transforms compiler spew into clarity
             </h2>
-            <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
-              Modern low-level projects still face diagnostic friction inherited from legacy compiler output.
+            <p className="mt-3 text-sm text-zinc-400 leading-relaxed">
+              Step through the internal diagnostic translation pipeline. From raw compiler stderr to a verified line diff.
             </p>
           </div>
 
-          <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2">
-            {/* The Problem */}
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900/50">
-              <div className="font-mono text-xs text-rose-500 dark:text-rose-400 uppercase tracking-wider font-semibold">
-                Without Kernova
-              </div>
-              <h3 className="mt-2 text-base font-bold text-zinc-900 dark:text-zinc-100">
-                Cascading spew and obscure terminal logs
-              </h3>
-              <ul className="mt-5 space-y-3.5 text-xs leading-relaxed text-zinc-600 dark:text-zinc-300">
-                <li className="flex items-start gap-2.5">
-                  <span className="text-zinc-400 font-mono select-none">—</span>
-                  <span>A single mismatched template argument produces 100+ lines of nested instantiation notes.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="text-zinc-400 font-mono select-none">—</span>
-                  <span>CMake and Ninja compilation delays hide behind wall-clock terminal logs without critical-path visibility.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="text-zinc-400 font-mono select-none">—</span>
-                  <span>AddressSanitizer and Valgrind memory reports require manual pointer arithmetic and stack trace hunting.</span>
-                </li>
-              </ul>
+          {/* 4-Step Interactive Visual Anatomy */}
+          <div className="mt-14 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Step Selection Buttons */}
+            <div className="space-y-2.5 lg:col-span-5">
+              {anatomySteps.map((s, idx) => {
+                const isSelected = activeAnatomyStep === idx;
+                return (
+                  <button
+                    key={s.step}
+                    onClick={() => setActiveAnatomyStep(idx)}
+                    className={`w-full text-left p-4 rounded-xl border transition-all ${
+                      isSelected
+                        ? 'border-cyan-500/60 bg-zinc-900/90 shadow-md shadow-cyan-950/20'
+                        : 'border-zinc-850 bg-zinc-900/30 hover:border-zinc-800 hover:bg-zinc-900/50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between font-mono text-xs">
+                      <span className={`font-bold ${isSelected ? 'text-cyan-400' : 'text-zinc-500'}`}>
+                        STAGE {s.step}
+                      </span>
+                      <span className="text-[11px] text-zinc-500">
+                        {s.input}
+                      </span>
+                    </div>
+                    <h3 className="mt-2 text-sm font-bold text-zinc-100">
+                      {s.title}
+                    </h3>
+                    <p className="mt-1 text-xs text-zinc-400 line-clamp-2 leading-relaxed">
+                      {s.mechanism}
+                    </p>
+                  </button>
+                );
+              })}
             </div>
 
-            {/* The Solution */}
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900/50">
-              <div className="font-mono text-xs text-emerald-600 dark:text-emerald-400 uppercase tracking-wider font-semibold">
-                With Kernova Workspace
+            {/* Active Step Terminal Transformation Inspector */}
+            <div className="lg:col-span-7 rounded-2xl border border-zinc-800 bg-zinc-900/70 p-6 sm:p-7 font-mono text-xs shadow-xl">
+              <div className="flex items-center justify-between border-b border-zinc-800 pb-3 text-[11px] text-zinc-400">
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-cyan-400" />
+                  <span className="font-bold text-zinc-200">
+                    STAGE {anatomySteps[activeAnatomyStep].step}: {anatomySteps[activeAnatomyStep].title}
+                  </span>
+                </div>
+                <span className="text-zinc-500 font-sans">AST Transformation</span>
               </div>
-              <h3 className="mt-2 text-base font-bold text-zinc-900 dark:text-zinc-100">
-                Synthesized causes with verifiable diffs
-              </h3>
-              <ul className="mt-5 space-y-3.5 text-xs leading-relaxed text-zinc-600 dark:text-zinc-300">
-                <li className="flex items-start gap-2.5">
-                  <Check className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" />
-                  <span>Parsed compiler AST trees isolate the genuine constraint mismatch down to a single concise cause.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <Check className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" />
-                  <span>Build graphs profile serial target bottlenecks and reveal redundant transitive header inclusions.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <Check className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" />
-                  <span>Crash sites correlate allocation boundaries with fault addresses to explain memory errors directly in context.</span>
-                </li>
-              </ul>
+
+              <div className="mt-5 space-y-4">
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-zinc-500 mb-1.5 font-bold">
+                    Transformation Target
+                  </div>
+                  <div className="p-3 rounded-lg bg-zinc-950 border border-zinc-850 text-cyan-300 text-xs">
+                    {anatomySteps[activeAnatomyStep].transformation}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-zinc-500 mb-1.5 font-bold">
+                    System Architecture Mechanism
+                  </div>
+                  <p className="font-sans text-xs text-zinc-300 leading-relaxed bg-zinc-950/60 p-3 rounded-lg border border-zinc-850">
+                    {anatomySteps[activeAnatomyStep].mechanism}
+                  </p>
+                </div>
+
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-zinc-500 mb-1.5 font-bold">
+                    Data Representation Sample
+                  </div>
+                  <div className="rounded-lg bg-zinc-950 p-3.5 border border-zinc-850 text-zinc-300 leading-relaxed overflow-x-auto text-[11px]">
+                    <pre className="whitespace-pre-wrap">{anatomySteps[activeAnatomyStep].snippet}</pre>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-5 pt-3 border-t border-zinc-800 text-[11px] text-zinc-500 font-mono flex items-center justify-between">
+                <span>Deterministic LibClang parsing</span>
+                <span>Zero hallucination</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Developer Workflow Pipeline */}
-      <section className="py-16 sm:py-20">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      {/* Section 3: The Three Systems Bottlenecks (Editorial Layout) */}
+      <section className="py-20 sm:py-28 border-b border-zinc-900 bg-zinc-950/40">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center">
+            <span className="font-mono text-xs uppercase tracking-widest text-cyan-400">
+              The Three Bottlenecks
+            </span>
+            <h2 className="mt-2 text-2xl sm:text-4xl font-bold tracking-tight text-zinc-100 [text-wrap:balance]">
+              Why systems engineers lose days to diagnostic spew
+            </h2>
+          </div>
+
+          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Bottleneck 1 */}
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <span className="text-rose-400 font-bold">BOTTLENECK 01</span>
+                  <span className="text-zinc-500">C++ TEMPLATES</span>
+                </div>
+                <h3 className="mt-3 text-lg font-bold text-zinc-100">
+                  Concept & SFINAE Cascades
+                </h3>
+                <p className="mt-3 text-xs leading-relaxed text-zinc-400">
+                  A single missing type requirement triggers 150 lines of nested candidate evaluation notes, hiding the real source error in deep standard library headers.
+                </p>
+              </div>
+              <div className="mt-6 pt-4 border-t border-zinc-800/80">
+                <span className="text-[11px] font-mono text-cyan-400 font-semibold block mb-1">
+                  Kernova Resolution
+                </span>
+                <p className="text-xs text-zinc-300">
+                  AST constraint walkers isolate the single unmet concept requirement and show an immediate line diff.
+                </p>
+              </div>
+            </div>
+
+            {/* Bottleneck 2 */}
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <span className="text-amber-400 font-bold">BOTTLENECK 02</span>
+                  <span className="text-zinc-500">BUILD GRAPH</span>
+                </div>
+                <h3 className="mt-3 text-lg font-bold text-zinc-100">
+                  Opaque Critical Path Latency
+                </h3>
+                <p className="mt-3 text-xs leading-relaxed text-zinc-400">
+                  Ninja and CMake compilation times balloon when transitive headers force dozens of translation units to rebuild serially without precompiled headers.
+                </p>
+              </div>
+              <div className="mt-6 pt-4 border-t border-zinc-800/80">
+                <span className="text-[11px] font-mono text-cyan-400 font-semibold block mb-1">
+                  Kernova Resolution
+                </span>
+                <p className="text-xs text-zinc-300">
+                  Build graph profiling highlights serial bottlenecks and identifies forward-declaration optimizations.
+                </p>
+              </div>
+            </div>
+
+            {/* Bottleneck 3 */}
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <span className="text-violet-400 font-bold">BOTTLENECK 03</span>
+                  <span className="text-zinc-500">RUNTIME CRASHES</span>
+                </div>
+                <h3 className="mt-3 text-lg font-bold text-zinc-100">
+                  Hex Addresses & Stack Traces
+                </h3>
+                <p className="mt-3 text-xs leading-relaxed text-zinc-400">
+                  AddressSanitizer and Valgrind outputs require manual pointer arithmetic to correlate allocation sites with out-of-bounds reads.
+                </p>
+              </div>
+              <div className="mt-6 pt-4 border-t border-zinc-800/80">
+                <span className="text-[11px] font-mono text-cyan-400 font-semibold block mb-1">
+                  Kernova Resolution
+                </span>
+                <p className="text-xs text-zinc-300">
+                  Sanitizer triage explains buffer offsets in context and recommends bounds check guards.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 4: Architectural Blueprint & Linux Integration */}
+      <section className="py-20 sm:py-28 border-b border-zinc-900 bg-zinc-950">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <WorkflowDiagram />
         </div>
       </section>
 
-      {/* Core Technology Focus: 3 Clean Pillars */}
-      <section className="border-t border-zinc-200/80 bg-zinc-50/60 py-16 dark:border-zinc-850 dark:bg-zinc-950/60 sm:py-20">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-100">
-              Architectural Foundations
+      {/* Section 5: Early-Stage Commitment & Direct Founder Contact */}
+      <section className="py-20 sm:py-24 bg-zinc-950 bg-grid-subtle">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl border border-zinc-800 bg-zinc-900/60 p-8 sm:p-12 text-center backdrop-blur-md">
+            <span className="font-mono text-xs uppercase tracking-widest text-cyan-400">
+              Founder Direct Access
+            </span>
+            <h2 className="mt-3 text-2xl sm:text-4xl font-extrabold tracking-tight text-zinc-100 [text-wrap:balance]">
+              Help shape the future of Linux C/C++ tooling
             </h2>
-            <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
-              Engineered exclusively for Linux workstations and devcontainers.
+            <p className="mx-auto mt-4 max-w-2xl text-xs sm:text-sm leading-relaxed text-zinc-400">
+              Kernova is an independent early-stage developer tools startup. We are actively refining our prototype with developers writing compilers, graphics engines, embedded firmwares, and systems software.
             </p>
-          </div>
 
-          <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900/50">
-              <Terminal className="h-5 w-5 text-zinc-700 dark:text-zinc-300" />
-              <h3 className="mt-4 text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                Linux-Native Runtime
-              </h3>
-              <p className="mt-2 text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">
-                Runs as a local background daemon communicating via POSIX UNIX domain sockets. No cross-platform runtime bloat.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900/50">
-              <Cpu className="h-5 w-5 text-zinc-700 dark:text-zinc-300" />
-              <h3 className="mt-4 text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                Clang & GCC Structured JSON
-              </h3>
-              <p className="mt-2 text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">
-                Ingests machine-readable diagnostic streams and AST definitions directly, eliminating inaccurate regex heuristics.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900/50">
-              <Shield className="h-5 w-5 text-zinc-700 dark:text-zinc-300" />
-              <h3 className="mt-4 text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                Local-First Privacy
-              </h3>
-              <p className="mt-2 text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">
-                Your proprietary source code stays on your machine. Diagnostic parsing runs locally without remote code telemetry.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Early-Stage Startup Mission Callout */}
-      <section className="py-16 sm:py-20 border-t border-zinc-200/80 dark:border-zinc-850">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-8 dark:border-zinc-800 dark:bg-zinc-900/40 text-center sm:p-12">
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-              Building for developers who value precision over hype
-            </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-xs sm:text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              Kernova is an independent early-stage project developing its initial MVP. We are actively refining our diagnostic engine with systems developers working on compilers, embedded systems, and high-performance infrastructure.
-            </p>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Link
                 to="/contact"
-                className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+                className="inline-flex items-center gap-2 rounded-lg bg-zinc-100 px-5 py-2.5 text-xs font-semibold text-zinc-950 hover:bg-white transition-colors"
               >
-                <span>Contact Founding Engineers</span>
-                <ArrowRight className="h-3 w-3" />
+                <span>Write to contact@kernova.click</span>
+                <ArrowRight className="h-3.5 w-3.5" />
               </Link>
               <Link
                 to="/roadmap"
-                className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-4 py-2 text-xs font-medium text-zinc-700 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:text-white"
+                className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-5 py-2.5 text-xs font-semibold text-zinc-300 hover:text-white transition-colors"
               >
-                <span>View 5-Phase Roadmap</span>
+                <span>Review 5-Phase Roadmap</span>
               </Link>
+            </div>
+
+            <div className="mt-6 font-mono text-[11px] text-zinc-500">
+              No marketing waitlist · Direct engineering collaboration · Local-first privacy
             </div>
           </div>
         </div>

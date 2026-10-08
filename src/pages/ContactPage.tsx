@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Globe, Send, Copy, Check, Shield, Terminal } from 'lucide-react';
+import { Mail, Globe, Send, Copy, Check, Shield, Terminal, ArrowUpRight, MessageSquareCode } from 'lucide-react';
 import { SEOHead } from '../components/ui/SEOHead';
 import { ContactFormData } from '../types';
 
@@ -12,12 +12,14 @@ export const ContactPage: React.FC = () => {
     message: '',
   });
 
-  const [copied, setCopied] = useState(false);
+  const [copiedAddress, setCopiedAddress] = useState(false);
+  const [copiedFullMessage, setCopiedFullMessage] = useState(false);
 
   const topics = [
     'Alpha Testing & Early Access',
     'Compiler Diagnostics Discussion',
-    'Build Systems & Workflows',
+    'Build Systems & Workflows (CMake/Ninja)',
+    'Architecture & Linux Infrastructure',
     'General Inquiry',
   ];
 
@@ -36,116 +38,145 @@ Project/Organization: ${formData.organization || 'None'}
 Topic: ${formData.topic}
 
 Message:
-${formData.message || 'I am interested in Kernova Developer Workspace and would like to learn more.'}`
+${formData.message || 'I am interested in testing the Kernova Developer Workspace and would like to learn more.'}`
   );
 
   const mailtoUri = `mailto:contact@kernova.click?subject=${subjectText}&body=${bodyText}`;
 
-  const handleCopyMessage = () => {
-    const rawMessage = `To: contact@kernova.click
+  const copyEmailAddress = () => {
+    navigator.clipboard.writeText('contact@kernova.click');
+    setCopiedAddress(true);
+    setTimeout(() => setCopiedAddress(false), 2000);
+  };
+
+  const copyFullMessage = () => {
+    const formatted = `To: contact@kernova.click
 Subject: [Kernova] ${formData.topic} - ${formData.name || 'Developer'}
 Organization: ${formData.organization || 'None'}
 From: ${formData.email || 'None'}
 
 Message:
-${formData.message || 'I am interested in Kernova Developer Workspace.'}`;
+${formData.message || 'I am interested in testing the Kernova Developer Workspace.'}`;
 
-    navigator.clipboard.writeText(rawMessage);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    navigator.clipboard.writeText(formatted);
+    setCopiedFullMessage(true);
+    setTimeout(() => setCopiedFullMessage(false), 2000);
   };
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col bg-zinc-950 text-zinc-100 min-h-screen">
       <SEOHead
-        title="Contact — KERNOVA"
+        title="Contact Engineering — KERNOVA"
         description="Get in touch with Kernova at contact@kernova.click for early access, compiler workflow discussions, or general inquiries. Build Beyond Limits."
         canonicalPath="/contact"
       />
 
-      {/* Hero */}
-      <section className="pt-16 pb-12 sm:pt-20 sm:pb-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      {/* Hero Header */}
+      <section className="pt-16 pb-16 sm:pt-24 sm:pb-20 border-b border-zinc-900 bg-grid-subtle">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="inline-flex items-center gap-2 text-xs font-mono text-zinc-500 dark:text-zinc-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              <span>DIRECT INQUIRIES</span>
-              <span className="text-zinc-400 dark:text-zinc-600">/</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-800 bg-zinc-900/80 text-[11px] font-mono text-zinc-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
+              <span>DIRECT CHANNELS</span>
+              <span className="text-zinc-600">/</span>
               <span>contact@kernova.click</span>
             </div>
 
-            <h1 className="mt-4 text-3xl font-bold tracking-tight text-zinc-900 sm:text-5xl dark:text-zinc-100 [text-wrap:balance]">
-              Contact the engineering team.
+            <h1 className="mt-5 text-4xl sm:text-5xl font-extrabold tracking-tight text-zinc-100 [text-wrap:balance]">
+              Speak directly with our engineers.
             </h1>
 
-            <p className="mt-4 text-sm sm:text-base leading-relaxed text-zinc-600 dark:text-zinc-400 [text-wrap:balance]">
-              Whether you want to test early builds of the Kernova Developer Workspace, discuss compiler diagnostics, or provide feedback, reach out directly.
+            <p className="mt-4 text-base sm:text-lg leading-relaxed text-zinc-400 [text-wrap:balance]">
+              Whether you are evaluating C/C++ diagnostic tools, experiencing compilation bottlenecks, or interested in testing early Linux builds, reach out directly.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Main Content */}
-      <section className="border-t border-zinc-200/80 bg-zinc-50/60 py-16 dark:border-zinc-850 dark:bg-zinc-950/60 sm:py-20">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
+      {/* Main Contact Section */}
+      <section className="py-20 sm:py-28 border-b border-zinc-900 bg-zinc-950">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
             {/* Left Info Column */}
-            <div className="space-y-4 md:col-span-5">
-              <div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900/50">
-                <h2 className="text-xs font-bold uppercase tracking-wider font-mono text-zinc-900 dark:text-zinc-100">
-                  Direct Inquiries
-                </h2>
-                <div className="mt-4 space-y-3 font-mono text-xs">
-                  <div>
-                    <span className="text-zinc-500 block text-[11px]">Primary Email</span>
-                    <a
-                      href="mailto:contact@kernova.click"
-                      className="font-semibold text-zinc-900 hover:underline dark:text-zinc-100"
-                    >
-                      contact@kernova.click
-                    </a>
-                  </div>
+            <div className="md:col-span-5 space-y-6">
+              {/* Official Credentials */}
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 sm:p-7">
+                <span className="font-mono text-xs font-bold uppercase tracking-wider text-zinc-400">
+                  Official Communication Channel
+                </span>
 
-                  <div>
-                    <span className="text-zinc-500 block text-[11px]">Domain</span>
-                    <span className="text-zinc-900 dark:text-zinc-100">kernova.click</span>
+                <div className="mt-4 p-4 rounded-xl border border-zinc-800 bg-zinc-950 font-mono text-xs space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-zinc-500 text-[11px]">Direct Inbox:</span>
+                    <button
+                      type="button"
+                      onClick={copyEmailAddress}
+                      className="inline-flex items-center gap-1 text-[11px] text-cyan-400 hover:text-cyan-300 transition-colors"
+                      title="Copy email address"
+                    >
+                      {copiedAddress ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+                      <span>{copiedAddress ? 'Copied' : 'Copy'}</span>
+                    </button>
+                  </div>
+                  <div className="font-bold text-sm text-zinc-100 select-all">
+                    contact@kernova.click
                   </div>
                 </div>
 
-                <div className="mt-5 border-t border-zinc-100 pt-3 dark:border-zinc-800 text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                  Every inquiry sent to <span className="font-mono text-zinc-700 dark:text-zinc-300">contact@kernova.click</span> is read directly by our founding engineers.
+                <div className="mt-5 space-y-3 font-mono text-xs text-zinc-400">
+                  <div className="flex items-center justify-between py-1 border-b border-zinc-850">
+                    <span className="text-zinc-500">Domain:</span>
+                    <span className="text-zinc-200">kernova.click</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1 border-b border-zinc-850">
+                    <span className="text-zinc-500">PGP / Encryption:</span>
+                    <span className="text-zinc-400">Available on request</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1">
+                    <span className="text-zinc-500">Response Mode:</span>
+                    <span className="text-zinc-200">Founder Direct</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900/50">
-                <h3 className="text-xs font-bold uppercase tracking-wider font-mono text-zinc-900 dark:text-zinc-100">
-                  Open Source & Community
-                </h3>
-                <p className="mt-2 text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">
-                  Public repositories and community communication channels will be opened alongside our Phase 1 milestone.
-                </p>
+              {/* Instructions for Useful Bug / Workflow Inquiries */}
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6">
+                <div className="flex items-center gap-2 font-mono text-xs font-bold text-zinc-200 mb-2">
+                  <Terminal className="h-4 w-4 text-cyan-400" />
+                  <span>HELPFUL INFORMATION TO INCLUDE</span>
+                </div>
+                <ul className="space-y-2 text-xs text-zinc-400 leading-relaxed font-sans">
+                  <li>• Your Linux distribution and kernel version (e.g. Ubuntu 24.04, Arch Linux).</li>
+                  <li>• Compiler toolchains used (e.g. GCC 13, Clang 18, libc++).</li>
+                  <li>• Build orchestrator (CMake with Ninja, Make, Meson).</li>
+                  <li>• A brief snippet or description of the error cascade or build bottleneck.</li>
+                </ul>
               </div>
             </div>
 
-            {/* Right Form Column */}
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-xs dark:border-zinc-800 dark:bg-zinc-900/50 md:col-span-7">
-              <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                Compose message to contact@kernova.click
-              </h2>
-              <p className="mt-1 text-xs text-zinc-500">
-                Fill in your details below to prepare an email or copy the formatted text.
-              </p>
+            {/* Right Form Column: Pre-Formatted Mailto Dispatcher */}
+            <div className="md:col-span-7 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 sm:p-8 shadow-xl">
+              <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
+                <div>
+                  <h2 className="text-base sm:text-lg font-bold text-zinc-100">
+                    Prepare Email to contact@kernova.click
+                  </h2>
+                  <p className="mt-0.5 text-xs text-zinc-400">
+                    Select your topic and craft your message. Launch your email app or copy formatted text.
+                  </p>
+                </div>
+              </div>
 
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
                   window.location.href = mailtoUri;
                 }}
-                className="mt-5 space-y-3.5"
+                className="mt-6 space-y-4"
               >
-                <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="name" className="block text-[11px] font-mono text-zinc-600 dark:text-zinc-400">
+                    <label htmlFor="name" className="block font-mono text-xs text-zinc-400">
                       Your Name
                     </label>
                     <input
@@ -155,13 +186,13 @@ ${formData.message || 'I am interested in Kernova Developer Workspace.'}`;
                       value={formData.name}
                       onChange={handleInputChange}
                       placeholder="e.g. Linus Chen"
-                      className="mt-1 w-full rounded-md border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs text-zinc-900 transition-colors focus:border-zinc-900 focus:bg-white focus:outline-hidden dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:focus:border-zinc-100"
+                      className="mt-1.5 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2 text-xs text-zinc-100 placeholder:text-zinc-600 transition-colors focus:border-cyan-500 focus:outline-hidden"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="email" className="block text-[11px] font-mono text-zinc-600 dark:text-zinc-400">
-                      Your Email
+                    <label htmlFor="email" className="block font-mono text-xs text-zinc-400">
+                      Your Email Address
                     </label>
                     <input
                       type="email"
@@ -169,26 +200,26 @@ ${formData.message || 'I am interested in Kernova Developer Workspace.'}`;
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      placeholder="e.g. developer@company.com"
-                      className="mt-1 w-full rounded-md border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs text-zinc-900 transition-colors focus:border-zinc-900 focus:bg-white focus:outline-hidden dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:focus:border-zinc-100"
+                      placeholder="e.g. developer@infrastructure.org"
+                      className="mt-1.5 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2 text-xs text-zinc-100 placeholder:text-zinc-600 transition-colors focus:border-cyan-500 focus:outline-hidden"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="topic" className="block text-[11px] font-mono text-zinc-600 dark:text-zinc-400">
-                      Topic
+                    <label htmlFor="topic" className="block font-mono text-xs text-zinc-400">
+                      Inquiry Topic
                     </label>
                     <select
                       id="topic"
                       name="topic"
                       value={formData.topic}
                       onChange={handleInputChange}
-                      className="mt-1 w-full rounded-md border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs text-zinc-900 transition-colors focus:border-zinc-900 focus:bg-white focus:outline-hidden dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:focus:border-zinc-100"
+                      className="mt-1.5 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-zinc-100 transition-colors focus:border-cyan-500 focus:outline-hidden"
                     >
                       {topics.map((t) => (
-                        <option key={t} value={t}>
+                        <option key={t} value={t} className="bg-zinc-900">
                           {t}
                         </option>
                       ))}
@@ -196,8 +227,8 @@ ${formData.message || 'I am interested in Kernova Developer Workspace.'}`;
                   </div>
 
                   <div>
-                    <label htmlFor="organization" className="block text-[11px] font-mono text-zinc-600 dark:text-zinc-400">
-                      Project / Organization
+                    <label htmlFor="organization" className="block font-mono text-xs text-zinc-400">
+                      Project or Organization <span className="text-zinc-600">(Optional)</span>
                     </label>
                     <input
                       type="text"
@@ -205,44 +236,48 @@ ${formData.message || 'I am interested in Kernova Developer Workspace.'}`;
                       name="organization"
                       value={formData.organization}
                       onChange={handleInputChange}
-                      placeholder="Optional"
-                      className="mt-1 w-full rounded-md border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs text-zinc-900 transition-colors focus:border-zinc-900 focus:bg-white focus:outline-hidden dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:focus:border-zinc-100"
+                      placeholder="e.g. Systems Lab / Open Source"
+                      className="mt-1.5 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2 text-xs text-zinc-100 placeholder:text-zinc-600 transition-colors focus:border-cyan-500 focus:outline-hidden"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="message" className="block text-[11px] font-mono text-zinc-600 dark:text-zinc-400">
-                    Message
+                  <label htmlFor="message" className="block font-mono text-xs text-zinc-400">
+                    Message / Technical Requirements
                   </label>
                   <textarea
                     id="message"
                     name="message"
-                    rows={4}
+                    rows={5}
                     value={formData.message}
                     onChange={handleInputChange}
-                    placeholder="Describe your C/C++ compiler setup, toolchain requirements, or feedback..."
-                    className="mt-1 w-full rounded-md border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs text-zinc-900 transition-colors focus:border-zinc-900 focus:bg-white focus:outline-hidden dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:focus:border-zinc-100"
+                    placeholder="Tell us about your C/C++ toolchain, compiler versions, or specific diagnostic friction points you'd like to test..."
+                    className="mt-1.5 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs text-zinc-100 placeholder:text-zinc-600 transition-colors focus:border-cyan-500 focus:outline-hidden leading-relaxed"
                   />
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2.5 pt-2">
+                <div className="pt-2 flex flex-wrap items-center gap-3">
                   <a
                     href={mailtoUri}
-                    className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+                    className="inline-flex items-center gap-2 rounded-lg bg-zinc-100 px-5 py-2.5 text-xs font-semibold text-zinc-950 hover:bg-white transition-colors"
                   >
-                    <Send className="h-3 w-3" />
-                    <span>Open Mail Client</span>
+                    <Send className="h-3.5 w-3.5" />
+                    <span>Launch in Mail Client</span>
                   </a>
 
                   <button
                     type="button"
-                    onClick={handleCopyMessage}
-                    className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3.5 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900"
+                    onClick={copyFullMessage}
+                    className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-xs font-semibold text-zinc-300 hover:text-white hover:border-zinc-700 transition-colors"
                   >
-                    {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
-                    <span>{copied ? 'Copied' : 'Copy Text'}</span>
+                    {copiedFullMessage ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                    <span>{copiedFullMessage ? 'Message Copied!' : 'Copy Formatted Text'}</span>
                   </button>
+                </div>
+
+                <div className="pt-2 text-[11px] font-mono text-zinc-500 leading-relaxed">
+                  Notice: Clicking "Launch in Mail Client" opens your system mail handler addressed to <span className="text-zinc-300">contact@kernova.click</span>. Alternatively, click "Copy Formatted Text" to paste into webmail.
                 </div>
               </form>
             </div>

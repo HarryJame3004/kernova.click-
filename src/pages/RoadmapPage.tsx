@@ -1,91 +1,111 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Check, CircleDashed, Clock, ArrowRight, Shield } from 'lucide-react';
+import { Check, CircleDashed, Clock, ArrowRight, Shield, GitBranch, ArrowUpRight } from 'lucide-react';
 import { SEOHead } from '../components/ui/SEOHead';
 import { ScrollProgressBar } from '../components/ui/ScrollProgressBar';
-import { RoadmapMilestone } from '../types';
 
-const milestones: RoadmapMilestone[] = [
+interface Milestone {
+  phase: string;
+  number: string;
+  title: string;
+  status: 'In Active Progress' | 'Planned for Next Cycle' | 'Future Evaluation';
+  statusType: 'active' | 'planned' | 'vision';
+  timelineLabel: string;
+  summary: string;
+  deliverables: { text: string; done?: boolean }[];
+}
+
+const milestones: Milestone[] = [
   {
-    phase: 1,
-    title: 'MVP Prototype',
-    status: 'In Progress',
+    phase: 'Phase 1',
+    number: '01',
+    title: 'MVP Prototype & Core Ingestion',
+    status: 'In Active Progress',
+    statusType: 'active',
     timelineLabel: 'Current Focus · Active Prototyping',
     summary:
       'Laying foundational Linux runtime infrastructure and core diagnostic capture mechanisms for GCC and Clang.',
     deliverables: [
-      'Development of kernovad Linux daemon with UNIX domain socket IPC',
-      'Ingestion parser for Clang JSON diagnostics and GCC -fdiagnostics-format=json streams',
-      'Initial AST symbol demangler and template constraint mismatch normalizer',
-      'CLI tool demonstrating terminal diagnostic translation into formatted diffs',
-      'Evaluation on C++17 and C++20 open-source test suites',
+      { text: 'kernovad Linux daemon running via local UNIX domain socket IPC', done: true },
+      { text: 'Ingestion parser for Clang JSON diagnostics and GCC -fdiagnostics-format=json', done: true },
+      { text: 'AST symbol demangler and template constraint mismatch normalizer', done: false },
+      { text: 'CLI tool (kernova-cli) demonstrating terminal diagnostic translation into formatted diffs', done: false },
+      { text: 'Benchmarking on C++17 and C++20 open-source test suites', done: false },
     ],
   },
   {
-    phase: 2,
+    phase: 'Phase 2',
+    number: '02',
     title: 'Compiler Diagnostics & Build Workflow Integration',
-    status: 'Planned',
-    timelineLabel: 'Next Engineering Cycle',
+    status: 'Planned for Next Cycle',
+    statusType: 'planned',
+    timelineLabel: 'Planned for Next Engineering Cycle',
     summary:
       'Expanding from single-file errors to full project build orchestration with CMake and Ninja graph profiling.',
     deliverables: [
-      'Integration with CMake File-API for build target introspection',
-      'Ninja build trace parser with critical path compile-time bottleneck visualization',
-      'Transitive header dependency analyzer for detecting compilation bloat',
-      'Initial preview of the standalone Kernova Developer Workspace interface',
-      'LSP protocol bridge providing diagnostics directly to Neovim and VS Code',
+      { text: 'Direct integration with CMake File-API for build target introspection' },
+      { text: 'Ninja build trace parser with critical path compile-time bottleneck visualization' },
+      { text: 'Transitive header dependency analyzer for detecting compilation bloat' },
+      { text: 'Initial preview of the standalone Kernova Developer Workspace interface' },
+      { text: 'LSP protocol bridge providing diagnostics directly to Neovim and VS Code' },
     ],
   },
   {
-    phase: 3,
+    phase: 'Phase 3',
+    number: '03',
     title: 'AI-Assisted Debugging Evaluation',
-    status: 'Planned',
+    status: 'Future Evaluation',
+    statusType: 'vision',
     timelineLabel: 'Research & Evaluation Cycle',
     summary:
-      'Evaluation of grounded local models for memory debugging and runtime crash triage.',
+      'Rigorous evaluation of grounded local language models for memory debugging and runtime crash triage.',
     deliverables: [
-      'Automated parsing of AddressSanitizer (ASan) and UndefinedBehaviorSanitizer (UBSan) reports',
-      'GDB / LLDB session bridge linking crash backtraces with source code variables',
-      'Evaluation of local model inference (llama.cpp) for private code comprehension',
-      'Verification benchmarks to test diagnostic fidelity and accuracy in generated diffs',
-      'Opt-in developer privacy guardrails ensuring source code remains local',
+      { text: 'Automated parsing of AddressSanitizer (ASan) and UndefinedBehaviorSanitizer (UBSan) reports' },
+      { text: 'GDB / LLDB session bridge linking crash backtraces with source code variables' },
+      { text: 'Evaluation of local, quantized model inference (llama.cpp) for private code comprehension' },
+      { text: 'Verification benchmarks to test diagnostic fidelity and accuracy in generated diffs' },
+      { text: 'Opt-in developer privacy guardrails ensuring source code never leaves the local machine' },
     ],
   },
   {
-    phase: 4,
+    phase: 'Phase 4',
+    number: '04',
     title: 'User Testing & Product Refinement',
-    status: 'Planned',
-    timelineLabel: 'Closed Alpha Testing',
+    status: 'Future Evaluation',
+    statusType: 'vision',
+    timelineLabel: 'Closed Alpha Cycle',
     summary:
-      'Testing with selected systems engineering teams to measure real-world build time improvements and usability.',
+      'Closed testing with selected systems engineering teams to measure real-world build time improvements and usability.',
     deliverables: [
-      'Closed alpha testing cohort with C/C++ developers working on Linux systems software',
-      'Testing on diverse multi-target codebases and compiler setups',
-      'Telemetry-free crash reporting and local benchmark tooling',
-      'Packaging and distribution for common Linux distributions',
-      'Documentation and technical issue tracker setup',
+      { text: 'Closed alpha testing cohort with C/C++ developers working on Linux systems software' },
+      { text: 'Stress testing on multi-million line codebases and complex build graphs' },
+      { text: 'Telemetry-free crash reporting and local performance benchmark tooling' },
+      { text: 'Packaging and distribution via Linux package managers (APT, AUR, RPM, Nix)' },
+      { text: 'Technical architecture guides and documentation' },
     ],
   },
   {
-    phase: 5,
+    phase: 'Phase 5',
+    number: '05',
     title: 'Expanded Developer Platform',
-    status: 'Planned',
+    status: 'Future Evaluation',
+    statusType: 'vision',
     timelineLabel: 'Long-Term Platform Vision',
     summary:
       'Evolving the workspace into a comprehensive low-level systems engineering platform supporting cross-language systems tooling.',
     deliverables: [
-      'Support for mixed C, C++, and Rust FFI boundary analysis',
-      'Cross-compilation profiling for embedded systems (ARM Cortex-M, RISC-V)',
-      'Integration with Linux performance profiling tools (perf)',
-      'Self-hosted enterprise deployment options for teams',
-      'Plugin API for custom compiler extensions and domain-specific linters',
+      { text: 'Multi-language systems support including C, C++, and Rust FFI boundary analysis' },
+      { text: 'Cross-compilation profiling for embedded systems (ARM Cortex-M, RISC-V)' },
+      { text: 'Linux performance profiling tool integration (perf/eBPF)' },
+      { text: 'Self-hosted team deployment options for internal development servers' },
+      { text: 'Plugin API for custom compiler extensions and domain-specific linters' },
     ],
   },
 ];
 
 export const RoadmapPage: React.FC = () => {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col bg-zinc-950 text-zinc-100 min-h-screen">
       <ScrollProgressBar />
       <SEOHead
         title="Engineering Roadmap — KERNOVA"
@@ -93,101 +113,133 @@ export const RoadmapPage: React.FC = () => {
         canonicalPath="/roadmap"
       />
 
-      {/* Hero */}
-      <section className="pt-16 pb-12 sm:pt-20 sm:pb-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      {/* Hero Header */}
+      <section className="pt-16 pb-16 sm:pt-24 sm:pb-20 border-b border-zinc-900 bg-grid-subtle">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="inline-flex items-center gap-2 text-xs font-mono text-zinc-500 dark:text-zinc-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              <span>PRODUCT MILESTONES</span>
-              <span className="text-zinc-400 dark:text-zinc-600">/</span>
-              <span>5 PLANNED PHASES</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-800 bg-zinc-900/80 text-[11px] font-mono text-zinc-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
+              <span>ENGINEERING TIMELINE</span>
+              <span className="text-zinc-600">/</span>
+              <span>FIVE PLANNED PHASES</span>
             </div>
 
-            <h1 className="mt-4 text-3xl font-bold tracking-tight text-zinc-900 sm:text-5xl dark:text-zinc-100 [text-wrap:balance]">
-              Engineering Roadmap
+            <h1 className="mt-5 text-4xl sm:text-5xl font-extrabold tracking-tight text-zinc-100 [text-wrap:balance]">
+              Our path from prototype to production.
             </h1>
 
-            <p className="mt-4 text-sm sm:text-base leading-relaxed text-zinc-600 dark:text-zinc-400 [text-wrap:balance]">
-              Our planned development milestones from early MVP prototype to platform expansion. Clear boundaries between active development and future phases.
+            <p className="mt-4 text-base sm:text-lg leading-relaxed text-zinc-400 [text-wrap:balance]">
+              We believe in honest, public engineering milestones. Every phase below reflects our concrete development timeline, with distinct boundaries between active work and future research.
             </p>
           </div>
         </div>
       </section>
 
-      {/* 5-Phase Roadmap */}
-      <section className="border-t border-zinc-200/80 bg-zinc-50/60 py-16 dark:border-zinc-850 dark:bg-zinc-950/60 sm:py-20">
+      {/* Distinctive Vertical Timeline Layout */}
+      <section className="py-20 sm:py-28 border-b border-zinc-900 bg-zinc-950">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <div className="space-y-6">
-            {milestones.map((milestone) => {
-              const isInProgress = milestone.status === 'In Progress';
+          <div className="space-y-10 relative">
+            {/* Background vertical line */}
+            <div className="absolute left-6 sm:left-8 top-6 bottom-6 w-px bg-zinc-800 hidden sm:block" />
+
+            {milestones.map((m) => {
+              const isActive = m.statusType === 'active';
               return (
-                <div
-                  key={milestone.phase}
-                  className={`rounded-xl border p-5 sm:p-7 transition-all ${
-                    isInProgress
-                      ? 'border-zinc-900 bg-white shadow-xs dark:border-zinc-300 dark:bg-zinc-900'
-                      : 'border-zinc-200 bg-white/70 dark:border-zinc-800 dark:bg-zinc-900/40'
-                  }`}
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-100 pb-3.5 dark:border-zinc-800">
-                    <div className="flex items-center gap-3">
-                      <span className="font-mono text-xs font-bold text-zinc-500">
-                        P0{milestone.phase}
-                      </span>
+                <div key={m.phase} className="relative sm:pl-16">
+                  {/* Timeline node */}
+                  <div
+                    className={`hidden sm:flex absolute left-4 -translate-x-1/2 top-6 h-8 w-8 rounded-full items-center justify-center font-mono text-xs font-bold border ${
+                      isActive
+                        ? 'border-cyan-400 bg-zinc-950 text-cyan-300 shadow-md shadow-cyan-950/50'
+                        : 'border-zinc-800 bg-zinc-900 text-zinc-500'
+                    }`}
+                  >
+                    {m.number}
+                  </div>
+
+                  {/* Milestone Card */}
+                  <div
+                    className={`rounded-2xl border p-6 sm:p-8 transition-all ${
+                      isActive
+                        ? 'border-cyan-500/50 bg-zinc-900/80 shadow-xl shadow-cyan-950/20'
+                        : 'border-zinc-850 bg-zinc-900/30'
+                    }`}
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800 pb-4">
                       <div>
-                        <h3 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-zinc-100">
-                          {milestone.title}
+                        <div className="font-mono text-xs font-bold text-zinc-500">
+                          {m.phase}
+                        </div>
+                        <h3 className="text-lg sm:text-xl font-bold text-zinc-100 mt-0.5">
+                          {m.title}
                         </h3>
-                        <p className="font-mono text-[11px] text-zinc-500">
-                          {milestone.timelineLabel}
+                        <p className="font-mono text-[11px] text-zinc-500 mt-1">
+                          {m.timelineLabel}
                         </p>
+                      </div>
+
+                      <div className="font-mono text-xs">
+                        {isActive ? (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-800 text-cyan-300 font-semibold text-[11px]">
+                            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                            <span>In Active Progress</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 text-[11px]">
+                            <CircleDashed className="h-3 w-3" />
+                            <span>{m.status}</span>
+                          </span>
+                        )}
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 font-mono text-xs">
-                      {isInProgress ? (
-                        <span className="inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-semibold text-[11px]">
-                          <Clock className="h-3.5 w-3.5" />
-                          <span>In Active Progress</span>
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-zinc-500 text-[11px]">
-                          <CircleDashed className="h-3.5 w-3.5" />
-                          <span>Planned</span>
-                        </span>
-                      )}
+                    <p className="mt-4 text-xs sm:text-sm text-zinc-300 leading-relaxed font-sans">
+                      {m.summary}
+                    </p>
+
+                    <div className="mt-6">
+                      <div className="font-mono text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3">
+                        Planned Deliverables
+                      </div>
+                      <ul className="space-y-2 font-mono text-xs">
+                        {m.deliverables.map((item, idx) => (
+                          <li key={idx} className="flex items-start gap-2.5 text-zinc-400 leading-relaxed">
+                            {item.done ? (
+                              <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                            ) : (
+                              <span className="text-zinc-600 select-none mt-0.5 font-bold">•</span>
+                            )}
+                            <span className={item.done ? 'text-zinc-200' : 'text-zinc-400'}>
+                              {item.text}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                  </div>
-
-                  <p className="mt-3.5 text-xs sm:text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-                    {milestone.summary}
-                  </p>
-
-                  <div className="mt-5">
-                    <h4 className="font-mono text-[11px] font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-200">
-                      Planned Deliverables
-                    </h4>
-                    <ul className="mt-2.5 space-y-1.5">
-                      {milestone.deliverables.map((item, idx) => (
-                        <li key={idx} className="flex items-start gap-2.5 text-xs text-zinc-600 dark:text-zinc-400">
-                          <Check className="h-3 w-3 mt-0.5 shrink-0 text-zinc-500" />
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
                   </div>
                 </div>
               );
             })}
           </div>
 
-          {/* Feedback note */}
-          <div className="mt-10 rounded-lg border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900 text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-            <strong className="text-zinc-900 dark:text-zinc-100 font-mono block mb-1">
-              ROADMAP GOVERNANCE
-            </strong>
-            This roadmap reflects verified engineering priorities. If you are developing on Linux and wish to test early Phase 1 prototype builds, contact us at <span className="font-mono text-zinc-900 dark:text-zinc-200">contact@kernova.click</span>.
+          {/* Governance Notice */}
+          <div className="mt-14 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 sm:p-8">
+            <div className="flex items-center gap-2 font-mono text-xs font-bold text-zinc-200 mb-2">
+              <Shield className="h-4 w-4 text-cyan-400" />
+              <span>ROADMAP GOVERNANCE COMMITMENT</span>
+            </div>
+            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-sans">
+              This roadmap represents verified engineering objectives. We update deliverable statuses as code is merged into our development tree. If you would like to participate in early Phase 1 testing or provide requirements for Phase 2, please reach out to our team.
+            </p>
+            <div className="mt-4">
+              <Link
+                to="/contact"
+                className="inline-flex items-center gap-1.5 font-mono text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+              >
+                <span>Request alpha testing participation</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
           </div>
         </div>
       </section>

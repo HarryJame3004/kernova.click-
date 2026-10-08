@@ -1,362 +1,697 @@
 import React, { useState } from 'react';
-import { Terminal, Check, Copy, AlertTriangle, ArrowRight, Layers, FileCode, Cpu, Sparkles } from 'lucide-react';
+import { 
+  Terminal, 
+  Check, 
+  Copy, 
+  AlertTriangle, 
+  ArrowRight, 
+  Layers, 
+  FileCode, 
+  Cpu, 
+  Folder, 
+  ChevronRight, 
+  ChevronDown, 
+  Split, 
+  Play, 
+  RotateCcw,
+  GitBranch,
+  ShieldAlert,
+  Bug,
+  Flame
+} from 'lucide-react';
+
+interface FileTreeItem {
+  name: string;
+  type: 'file' | 'folder';
+  scenarioId?: string;
+  active?: boolean;
+}
+
+interface CodeLine {
+  lineNum: number;
+  code: string;
+  isError?: boolean;
+  annotation?: string;
+  isPatched?: boolean;
+}
 
 interface Scenario {
   id: string;
-  filename: string;
+  name: string;
+  tag: string;
+  badgeColor: string;
   target: string;
-  category: string;
-  duration?: string;
-  rawError: string[];
-  diagnosis: {
+  activeFilePath: string;
+  breadcrumb: string;
+  sourceCode: CodeLine[];
+  patchedCode: CodeLine[];
+  rawStream: string[];
+  diagnostic: {
     title: string;
-    description: string;
-    astLocation: string;
-    resolution: string;
+    category: string;
+    astNode: string;
+    rootCause: string;
+    recommendation: string;
   };
-  diffLines: {
-    type: 'context' | 'delete' | 'add' | 'header';
-    content: string;
-    lineNumber?: string;
+  diff: {
+    type: 'header' | 'context' | 'delete' | 'add';
+    line?: string;
+    text: string;
   }[];
+  buildMetrics?: {
+    totalTargets: number;
+    bottleneckTarget: string;
+    latency: string;
+    overheadReason: string;
+  };
 }
 
 const scenarios: Scenario[] = [
   {
     id: 'cpp_concept',
-    filename: 'src/pipeline/graph_executor.cpp',
+    name: 'C++20 Concept Failure',
+    tag: 'Compiler Diagnostics',
+    badgeColor: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
     target: 'ninja: [14/320] building graph_executor.cpp.o',
-    category: 'C++20 Concept Failure',
-    rawError: [
-      'src/pipeline/graph_executor.cpp:142:5: error: no matching function for call to \'process_batch\'',
-      '  142 |     process_batch(task_queue);',
-      '      |     ^~~~~~~~~~~~~',
+    activeFilePath: 'src/pipeline/graph_executor.cpp',
+    breadcrumb: 'src > pipeline > graph_executor.cpp > execute_batch()',
+    sourceCode: [
+      { lineNum: 138, code: 'template <typename TaskQueue>' },
+      { lineNum: 139, code: 'void execute_batch(TaskQueue& queue) {' },
+      { lineNum: 140, code: '    std::vector<Task> task_buffer;' },
+      { lineNum: 141, code: '    queue.drain_into(task_buffer);' },
+      { lineNum: 142, code: '    process_contiguous_batch(task_buffer);', isError: true, annotation: 'requires ContiguousBuffer<std::vector<Task>>: constraint not satisfied' },
+      { lineNum: 143, code: '    queue.mark_completed();' },
+      { lineNum: 144, code: '}' },
+    ],
+    patchedCode: [
+      { lineNum: 138, code: 'template <typename TaskQueue>' },
+      { lineNum: 139, code: 'void execute_batch(TaskQueue& queue) {' },
+      { lineNum: 140, code: '    std::vector<Task> task_buffer;' },
+      { lineNum: 141, code: '    queue.drain_into(task_buffer);' },
+      { lineNum: 142, code: '    process_contiguous_batch(task_buffer);', isPatched: true },
+      { lineNum: 143, code: '    queue.mark_completed();' },
+      { lineNum: 144, code: '}' },
+    ],
+    rawStream: [
+      'src/pipeline/graph_executor.cpp:142:5: error: no matching function for call to \'process_contiguous_batch\'',
+      '  142 |     process_contiguous_batch(task_buffer);',
+      '      |     ^~~~~~~~~~~~~~~~~~~~~~~~',
       'include/pipeline/batch.hpp:56:6: note: candidate template ignored: constraints not satisfied',
-      '   56 | void process_batch(ContiguousRange auto& range) requires ContiguousBuffer<decltype(range)>',
+      '   56 | void process_contiguous_batch(ContiguousRange auto& range) requires ContiguousBuffer<decltype(range)>',
       '      |      ^',
       'include/pipeline/batch.hpp:22:15: note: because \'std::vector<Task>\' does not satisfy \'ContiguousBuffer\'',
       '   22 | concept ContiguousBuffer = std::is_trivially_copyable_v<typename T::value_type>;',
       '      |                            ^',
-      'note: \'Task\' is not trivially copyable because it has a user-provided copy constructor',
+      'note: \'Task\' is not trivially copyable because it has a user-defined copy constructor at include/task.hpp:24',
     ],
-    diagnosis: {
-      title: 'Type Invalidation in Template Constraint',
-      description: 'The struct `Task` explicitly declares a copy constructor in `task.hpp:24`, invalidating the `std::is_trivially_copyable_v` requirement expected by the `ContiguousBuffer` concept.',
-      astLocation: 'include/task.hpp:24: struct Task { Task(const Task&); ... }',
-      resolution: 'Default the copy constructor with `= default` to preserve trivial copyability, or relax `ContiguousBuffer` to accept non-trivial memory representations.',
+    diagnostic: {
+      title: 'Trivially Copyable Constraint Invalidation',
+      category: 'Constraint Metaprogramming',
+      astNode: 'include/task.hpp:24: struct Task defines custom Task(const Task&);',
+      rootCause: 'The `Task` struct defines a custom copy constructor in `task.hpp`, invalidating `std::is_trivially_copyable_v<Task>`. The concept `ContiguousBuffer` requires trivially copyable memory for zero-copy memcpy dispatch.',
+      recommendation: 'Replace the custom copy constructor in `include/task.hpp` with `= default`, or adjust the `ContiguousBuffer` concept signature to support non-trivial objects.',
     },
-    diffLines: [
-      { type: 'header', content: '@@ include/task.hpp:22,6 +22,5 @@' },
-      { type: 'context', content: ' struct Task {', lineNumber: '22' },
-      { type: 'context', content: '     uint64_t task_id;', lineNumber: '23' },
-      { type: 'delete', content: '-    Task(const Task& other) : task_id(other.task_id) {}', lineNumber: '24' },
-      { type: 'add', content: '+    Task(const Task&) = default; // Preserves ContiguousBuffer concept', lineNumber: '24' },
-      { type: 'context', content: ' };', lineNumber: '25' },
+    diff: [
+      { type: 'header', text: '@@ include/task.hpp:22,5 +22,4 @@' },
+      { type: 'context', line: '22', text: ' struct Task {' },
+      { type: 'context', line: '23', text: '     uint64_t task_id;' },
+      { type: 'delete', line: '24', text: '-    Task(const Task& other) : task_id(other.task_id) {}' },
+      { type: 'add', line: '24', text: '+    Task(const Task&) = default; // Restores is_trivially_copyable_v' },
+      { type: 'context', line: '25', text: ' };' },
     ],
+    buildMetrics: {
+      totalTargets: 320,
+      bottleneckTarget: 'graph_executor.cpp.o',
+      latency: '2.4s',
+      overheadReason: 'Deep SFINAE template instantiation backtrace (depth: 14)',
+    },
   },
   {
     id: 'ninja_bottleneck',
-    filename: 'build/ninja_build.log',
-    target: 'ninja: target \'engine_core\' critical path',
-    category: 'Build Graph Bottleneck',
-    rawError: [
+    name: 'Build Graph Bottleneck',
+    tag: 'Build Orchestration',
+    badgeColor: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
+    target: 'ninja: target \'engine_core\' serial bottleneck',
+    activeFilePath: 'include/engine/parser.hpp',
+    breadcrumb: 'include > engine > parser.hpp > Transitive Dependency Graph',
+    sourceCode: [
+      { lineNum: 10, code: '#pragma once' },
+      { lineNum: 11, code: '#include <string>' },
+      { lineNum: 12, code: '#include <nlohmann/json.hpp>', isError: true, annotation: 'Heavy serializer template: parsed transitively in 84 translation units' },
+      { lineNum: 13, code: '#include <boost/container/flat_map.hpp>', isError: true, annotation: 'Includes 420kB template definitions in public header' },
+      { lineNum: 14, code: '' },
+      { lineNum: 15, code: 'class ASTParser {' },
+      { lineNum: 16, code: 'public:' },
+      { lineNum: 17, code: '    bool parse(const std::string& input);' },
+      { lineNum: 18, code: '};' },
+    ],
+    patchedCode: [
+      { lineNum: 10, code: '#pragma once' },
+      { lineNum: 11, code: '#include <string>' },
+      { lineNum: 12, code: 'class JsonDocument; // Forward declaration', isPatched: true },
+      { lineNum: 13, code: 'struct ASTNode;    // Heavy includes moved to parser.cpp', isPatched: true },
+      { lineNum: 14, code: '' },
+      { lineNum: 15, code: 'class ASTParser {' },
+      { lineNum: 16, code: 'public:' },
+      { lineNum: 17, code: '    bool parse(const std::string& input);' },
+      { lineNum: 18, code: '};' },
+    ],
+    rawStream: [
       '[18/242] Building CXX object src/CMakeFiles/engine.dir/parser.cpp.o (elapsed: 48.2s)',
-      '[19/242] Building CXX object src/CMakeFiles/engine.dir/codegen.cpp.o (blocked on parser.hpp)',
-      'warning: heavy template header \'parser.hpp\' transitively included across 84 translation units',
+      '[19/242] Building CXX object src/CMakeFiles/engine.dir/codegen.cpp.o (waiting for parser.hpp)',
+      'warning: heavy template header \'parser.hpp\' included transitively in 84 translation units',
       'critical-path analysis: target \'engine_core\' serial bottleneck consumes 62% of aggregate compilation time',
       'diagnostic: 1.4M expanded tokens per translation unit without precompiled header',
     ],
-    diagnosis: {
+    diagnostic: {
       title: 'Transitive Header Compilation Bloat',
-      description: 'Heavy JSON serializers and associative containers are included directly inside `parser.hpp` instead of being forward-declared, forcing 84 downstream translation units to re-parse 1.4M tokens each.',
-      astLocation: 'include/parser.hpp:12: #include <nlohmann/json.hpp>',
-      resolution: 'Forward-declare AST structures in the public header and isolate template deserializers into `parser.cpp`.',
+      category: 'Build Graph Critical Path',
+      astNode: 'include/engine/parser.hpp:12-13 (#include <nlohmann/json.hpp>)',
+      rootCause: 'Heavy template libraries are included directly inside the public header `parser.hpp`. This causes 84 downstream `.cpp` files to re-parse 1.4 million tokens each, stalling Ninja parallelism.',
+      recommendation: 'Replace heavyweight header inclusions in `parser.hpp` with forward declarations. Move `#include <nlohmann/json.hpp>` exclusively into the private implementation file `parser.cpp`.',
     },
-    diffLines: [
-      { type: 'header', content: '@@ include/parser.hpp:11,5 +11,6 @@' },
-      { type: 'delete', content: '-#include <nlohmann/json.hpp>', lineNumber: '11' },
-      { type: 'delete', content: '-#include <boost/container/flat_map.hpp>', lineNumber: '12' },
-      { type: 'add', content: '+class JsonDocument; // Forward declaration', lineNumber: '11' },
-      { type: 'add', content: '+struct ParseNode;   // Header parsing cost reduced by 82%', lineNumber: '12' },
-      { type: 'context', content: ' class Parser { ... };', lineNumber: '13' },
+    diff: [
+      { type: 'header', text: '@@ include/engine/parser.hpp:11,4 +11,4 @@' },
+      { type: 'delete', line: '12', text: '-#include <nlohmann/json.hpp>' },
+      { type: 'delete', line: '13', text: '-#include <boost/container/flat_map.hpp>' },
+      { type: 'add', line: '12', text: '+class JsonDocument; // Forward declaration' },
+      { type: 'add', line: '13', text: '+struct ASTNode;     // Moves template bloat to parser.cpp' },
     ],
+    buildMetrics: {
+      totalTargets: 242,
+      bottleneckTarget: 'engine_core.a',
+      latency: '48.2s',
+      overheadReason: 'Serial bottleneck blocking 28 parallel compilation threads',
+    },
   },
   {
     id: 'asan_overflow',
-    filename: 'bin/packet_filter',
-    target: 'asan: heap-buffer-overflow report',
-    category: 'Memory Sanitizer Triage',
-    rawError: [
+    name: 'AddressSanitizer Overflow',
+    tag: 'Runtime Diagnostics',
+    badgeColor: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
+    target: 'bin/packet_filter (ASan heap-buffer-overflow crash)',
+    activeFilePath: 'src/net/packet_filter.c',
+    breadcrumb: 'src > net > packet_filter.c > parse_packet_header()',
+    sourceCode: [
+      { lineNum: 86, code: 'int parse_packet_header(uint8_t* buffer, size_t packet_len, size_t cap) {' },
+      { lineNum: 87, code: '    if (!buffer || packet_len == 0) return -1;' },
+      { lineNum: 88, code: '' },
+      { lineNum: 89, code: '    uint32_t checksum = *(uint32_t*)(buffer + packet_len);', isError: true, annotation: 'READ of size 4 at offset 500 on 500-byte allocation boundary' },
+      { lineNum: 90, code: '    return verify_crc32(buffer, packet_len, checksum);' },
+      { lineNum: 91, code: '}' },
+    ],
+    patchedCode: [
+      { lineNum: 86, code: 'int parse_packet_header(uint8_t* buffer, size_t packet_len, size_t cap) {' },
+      { lineNum: 87, code: '    if (!buffer || packet_len == 0) return -1;' },
+      { lineNum: 88, code: '    if (packet_len + sizeof(uint32_t) > cap) return -1; // Boundary check', isPatched: true },
+      { lineNum: 89, code: '    uint32_t checksum = *(uint32_t*)(buffer + packet_len);' },
+      { lineNum: 90, code: '    return verify_crc32(buffer, packet_len, checksum);' },
+      { lineNum: 91, code: '}' },
+    ],
+    rawStream: [
       '=================================================================',
       '==38291==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6030000001f4',
       'READ of size 4 at 0x6030000001f4 thread T0',
-      '    #0 0x55a82c in parse_packet_header src/net/filter.c:89:12',
+      '    #0 0x55a82c in parse_packet_header src/net/packet_filter.c:89:12',
       '    #1 0x55ac90 in dispatch_loop src/net/daemon.c:134:5',
       '0x6030000001f4 is located 0 bytes to the right of 500-byte region [0x603000000000, 0x6030000001f4)',
       'allocated by thread T0 here:',
       '    #0 0x7f48b in malloc (/usr/lib/clang/18/lib/libclang_rt.asan.so+0x7f48b)',
-      '    #1 0x55a712 in allocate_packet_buffer src/net/filter.c:42:19',
+      '    #1 0x55a712 in allocate_packet_buffer src/net/packet_filter.c:42:19',
     ],
-    diagnosis: {
-      title: 'Off-By-One Boundary Dereference',
-      description: 'The routine `parse_packet_header` reads a 32-bit CRC word starting at offset 500 on a 500-byte allocated buffer, attempting to read 4 bytes past the allocation limit.',
-      astLocation: 'src/net/filter.c:89: *(uint32_t*)(buffer + packet_len)',
-      resolution: 'Validate that `packet_len + sizeof(uint32_t) <= buffer_capacity` before performing pointer arithmetic.',
+    diagnostic: {
+      title: 'Off-By-One Allocation Boundary Read',
+      category: 'Memory Sanitizer Triage',
+      astNode: 'src/net/packet_filter.c:89: *(uint32_t*)(buffer + packet_len)',
+      rootCause: 'Reading 4 bytes (32-bit integer) starting exactly at byte offset 500 on an allocated buffer of exactly 500 bytes. This causes an immediate read past the heap allocation limit.',
+      recommendation: 'Add an explicit bounds guard `if (packet_len + sizeof(uint32_t) > cap) return -1;` before computing the checksum pointer dereference.',
     },
-    diffLines: [
-      { type: 'header', content: '@@ src/net/filter.c:88,4 +88,5 @@' },
-      { type: 'context', content: ' int parse_packet_header(uint8_t* buffer, size_t packet_len, size_t cap) {', lineNumber: '88' },
-      { type: 'add', content: '+    if (packet_len + sizeof(uint32_t) > cap) return -1; // Boundary guard', lineNumber: '89' },
-      { type: 'context', content: '     uint32_t checksum = *(uint32_t*)(buffer + packet_len);', lineNumber: '90' },
+    diff: [
+      { type: 'header', text: '@@ src/net/packet_filter.c:87,3 +87,4 @@' },
+      { type: 'context', line: '87', text: '     if (!buffer || packet_len == 0) return -1;' },
+      { type: 'add', line: '88', text: '+    if (packet_len + sizeof(uint32_t) > cap) return -1; // Guard boundary' },
+      { type: 'context', line: '89', text: '     uint32_t checksum = *(uint32_t*)(buffer + packet_len);' },
     ],
+    buildMetrics: {
+      totalTargets: 140,
+      bottleneckTarget: 'packet_filter',
+      latency: '0.12ms crash',
+      overheadReason: 'Heap buffer overflow captured by Clang -fsanitize=address instrumentation',
+    },
   },
 ];
 
 export const CodeWindow: React.FC = () => {
   const [activeScenarioId, setActiveScenarioId] = useState(scenarios[0].id);
-  const [activeTab, setActiveTab] = useState<'synthesis' | 'stream' | 'diff'>('synthesis');
+  const [activeTab, setActiveTab] = useState<'diagnosis' | 'diff' | 'raw' | 'graph'>('diagnosis');
+  const [patchApplied, setPatchApplied] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const scenario = scenarios.find((s) => s.id === activeScenarioId) || scenarios[0];
 
+  const handleScenarioChange = (id: string) => {
+    setActiveScenarioId(id);
+    setPatchApplied(false);
+  };
+
   const handleCopy = () => {
     let text = '';
-    if (activeTab === 'synthesis') {
-      text = `[Kernova Diagnostic]\nCause: ${scenario.diagnosis.title}\nDetails: ${scenario.diagnosis.description}\nLocation: ${scenario.diagnosis.astLocation}\nResolution: ${scenario.diagnosis.resolution}`;
-    } else if (activeTab === 'stream') {
-      text = scenario.rawError.join('\n');
+    if (activeTab === 'diagnosis') {
+      text = `[Kernova Diagnostic]\nTitle: ${scenario.diagnostic.title}\nRoot Cause: ${scenario.diagnostic.rootCause}\nRecommendation: ${scenario.diagnostic.recommendation}`;
+    } else if (activeTab === 'raw') {
+      text = scenario.rawStream.join('\n');
     } else {
-      text = scenario.diffLines.map((l) => l.content).join('\n');
+      text = scenario.diff.map((d) => d.text).join('\n');
     }
-
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const currentCodeLines = patchApplied ? scenario.patchedCode : scenario.sourceCode;
+
   return (
-    <div className="w-full rounded-xl border border-zinc-200 bg-zinc-950 text-zinc-100 shadow-2xl shadow-zinc-950/20 overflow-hidden dark:border-zinc-800">
-      {/* Top Chrome Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-2.5 border-b border-zinc-800/80 bg-zinc-900/90 px-4 py-2.5">
+    <div className="w-full rounded-2xl border border-zinc-200/90 bg-zinc-950 text-zinc-100 shadow-2xl shadow-zinc-950/40 overflow-hidden dark:border-zinc-800 transition-all">
+      {/* Chrome Top Title Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-850 bg-zinc-900/90 px-4 py-2.5">
         <div className="flex items-center gap-3">
-          {/* Subtle OS window indicators */}
+          {/* OS Window Traffic Lights */}
           <div className="flex items-center gap-1.5" aria-hidden="true">
-            <span className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
-            <span className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
-            <span className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
+            <span className="h-2.5 w-2.5 rounded-full bg-zinc-700/80" />
+            <span className="h-2.5 w-2.5 rounded-full bg-zinc-700/80" />
+            <span className="h-2.5 w-2.5 rounded-full bg-zinc-700/80" />
           </div>
 
           <div className="flex items-center gap-2 font-mono text-xs text-zinc-400">
-            <span className="text-zinc-500">kernova-workspace</span>
-            <span className="text-zinc-600">/</span>
-            <span className="text-zinc-200">{scenario.filename}</span>
+            <span className="font-semibold text-zinc-300">kernova-workspace</span>
+            <span className="text-zinc-600">·</span>
+            <span className="text-zinc-500 hidden sm:inline">Linux x86_64 POSIX Daemon</span>
+            <span className="text-zinc-600 hidden sm:inline">·</span>
+            <span className="text-zinc-300">{scenario.activeFilePath}</span>
           </div>
         </div>
 
-        {/* Scenario Switcher Buttons */}
-        <div className="flex items-center gap-1">
-          {scenarios.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => setActiveScenarioId(s.id)}
-              className={`rounded px-2.5 py-1 font-mono text-xs transition-colors ${
-                activeScenarioId === s.id
-                  ? 'bg-zinc-800 text-white font-medium shadow-xs'
-                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-850'
-              }`}
-            >
-              {s.category}
-            </button>
-          ))}
+        {/* Status indicator */}
+        <div className="flex items-center gap-2 font-mono text-[11px]">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-750">
+            <span className={`h-1.5 w-1.5 rounded-full ${patchApplied ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+            <span>{patchApplied ? 'Verified: Clean' : '1 Diagnostic Event'}</span>
+          </span>
         </div>
       </div>
 
-      {/* Subheader: Target Execution & View Mode Tabs */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-850 bg-zinc-900/40 px-4 py-2 text-xs">
-        <div className="flex items-center gap-2 font-mono text-zinc-400">
-          <Terminal className="h-3.5 w-3.5 text-zinc-500" />
-          <span className="truncate max-w-xs sm:max-w-md text-zinc-300">{scenario.target}</span>
+      {/* Scenario Bar: One-click technical scenario selector */}
+      <div className="flex items-center gap-1.5 overflow-x-auto border-b border-zinc-850 bg-zinc-900/50 px-3 py-1.5 text-xs font-mono">
+        <span className="text-zinc-500 text-[11px] uppercase tracking-wider px-2 shrink-0">
+          Scenarios:
+        </span>
+        {scenarios.map((s) => {
+          const isSelected = s.id === activeScenarioId;
+          return (
+            <button
+              key={s.id}
+              onClick={() => handleScenarioChange(s.id)}
+              className={`flex items-center gap-2 rounded-md px-3 py-1 text-xs transition-colors whitespace-nowrap shrink-0 ${
+                isSelected
+                  ? 'bg-zinc-800 text-white font-medium shadow-xs border border-zinc-700'
+                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-850/60'
+              }`}
+            >
+              <span className={`h-1.5 w-1.5 rounded-full ${isSelected ? 'bg-cyan-400' : 'bg-zinc-600'}`} />
+              <span>{s.name}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Main Multi-Pane Workbench Body */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[460px]">
+        {/* Left Side: File Tree Explorer (Hidden on small mobile, visible on tablet+) */}
+        <div className="hidden md:flex flex-col lg:col-span-3 border-r border-zinc-850 bg-zinc-950/70 p-3 font-mono text-xs select-none">
+          <div className="text-[11px] uppercase font-bold tracking-wider text-zinc-500 mb-2 px-2">
+            Project Explorer
+          </div>
+
+          <div className="space-y-1">
+            <div className="flex items-center gap-1.5 text-zinc-400 px-2 py-1">
+              <ChevronDown className="h-3.5 w-3.5 text-zinc-500" />
+              <Folder className="h-3.5 w-3.5 text-zinc-400" />
+              <span className="text-zinc-300">src</span>
+            </div>
+
+            <div className="pl-6 space-y-0.5">
+              <button
+                onClick={() => handleScenarioChange('cpp_concept')}
+                className={`w-full flex items-center gap-2 px-2 py-1 rounded text-left text-xs transition-colors ${
+                  activeScenarioId === 'cpp_concept'
+                    ? 'bg-zinc-850 text-cyan-300 font-medium'
+                    : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+              >
+                <FileCode className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">graph_executor.cpp</span>
+              </button>
+
+              <button
+                onClick={() => handleScenarioChange('asan_overflow')}
+                className={`w-full flex items-center gap-2 px-2 py-1 rounded text-left text-xs transition-colors ${
+                  activeScenarioId === 'asan_overflow'
+                    ? 'bg-zinc-850 text-rose-300 font-medium'
+                    : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+              >
+                <FileCode className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">packet_filter.c</span>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-1.5 text-zinc-400 px-2 py-1 mt-1">
+              <ChevronDown className="h-3.5 w-3.5 text-zinc-500" />
+              <Folder className="h-3.5 w-3.5 text-zinc-400" />
+              <span className="text-zinc-300">include</span>
+            </div>
+
+            <div className="pl-6 space-y-0.5">
+              <button
+                onClick={() => handleScenarioChange('ninja_bottleneck')}
+                className={`w-full flex items-center gap-2 px-2 py-1 rounded text-left text-xs transition-colors ${
+                  activeScenarioId === 'ninja_bottleneck'
+                    ? 'bg-zinc-850 text-amber-300 font-medium'
+                    : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+              >
+                <FileCode className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">parser.hpp</span>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 px-2 py-1 text-zinc-500 mt-2">
+              <Terminal className="h-3.5 w-3.5" />
+              <span className="truncate">build.ninja</span>
+            </div>
+            <div className="flex items-center gap-2 px-2 py-1 text-zinc-500">
+              <Terminal className="h-3.5 w-3.5" />
+              <span className="truncate">CMakeLists.txt</span>
+            </div>
+          </div>
+
+          <div className="mt-auto border-t border-zinc-850 pt-3 px-2 text-[11px] text-zinc-500">
+            <div>Target: Clang 18.1.3</div>
+            <div className="text-zinc-600">POSIX Socket Active</div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          {/* Mode Selector */}
-          <div className="flex items-center rounded-md bg-zinc-900 p-0.5 border border-zinc-800">
+        {/* Center: Source Code Editor Pane */}
+        <div className="flex flex-col lg:col-span-5 border-r border-zinc-850 bg-zinc-950 font-mono text-xs">
+          {/* Editor Header: Breadcrumb & Actions */}
+          <div className="flex items-center justify-between border-b border-zinc-850 bg-zinc-900/40 px-3 py-2 text-[11px] text-zinc-400">
+            <div className="flex items-center gap-1.5 truncate">
+              <FileCode className="h-3.5 w-3.5 text-cyan-400 shrink-0" />
+              <span className="truncate text-zinc-300">{scenario.breadcrumb}</span>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => setPatchApplied(!patchApplied)}
+                className={`inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] transition-colors ${
+                  patchApplied
+                    ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800'
+                    : 'bg-cyan-950/80 text-cyan-300 border border-cyan-800 hover:bg-cyan-900/60'
+                }`}
+                title="Toggle patch simulation"
+              >
+                {patchApplied ? <RotateCcw className="h-3 w-3" /> : <Play className="h-3 w-3" />}
+                <span>{patchApplied ? 'Revert Code' : 'Simulate Patch'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Editor Code Lines */}
+          <div className="p-4 flex-1 space-y-1 overflow-x-auto leading-relaxed">
+            {currentCodeLines.map((line) => {
+              const isError = line.isError && !patchApplied;
+              const isPatched = line.isPatched && patchApplied;
+
+              return (
+                <div key={line.lineNum} className="relative group">
+                  <div
+                    className={`flex items-start gap-3 px-2 py-0.5 rounded transition-colors ${
+                      isError
+                        ? 'bg-rose-950/40 text-rose-200'
+                        : isPatched
+                        ? 'bg-emerald-950/40 text-emerald-200'
+                        : 'text-zinc-300 hover:bg-zinc-900/40'
+                    }`}
+                  >
+                    <span className="w-8 shrink-0 text-right select-none text-zinc-600 text-[11px]">
+                      {line.lineNum}
+                    </span>
+                    <span className="whitespace-pre flex-1 font-mono text-xs">
+                      {line.code}
+                    </span>
+                  </div>
+
+                  {/* Inline Squiggle Popover if error */}
+                  {isError && line.annotation && (
+                    <div className="ml-11 mt-1 mb-2 p-2 rounded bg-rose-950/80 border border-rose-800/80 text-[11px] text-rose-200 flex items-start gap-2 shadow-lg">
+                      <AlertTriangle className="h-3.5 w-3.5 text-rose-400 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-bold">Compiler Diagnostic:</span>{' '}
+                        <span>{line.annotation}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Inline Success Notice if patch applied */}
+                  {isPatched && (
+                    <div className="ml-11 mt-1 mb-2 p-2 rounded bg-emerald-950/80 border border-emerald-800/80 text-[11px] text-emerald-200 flex items-start gap-2 shadow-lg">
+                      <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-bold">Applied Remediation:</span>{' '}
+                        <span>Concept requirement satisfied. Verified AST syntax.</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="border-t border-zinc-850 bg-zinc-900/30 px-3 py-1.5 text-[11px] text-zinc-500 flex items-center justify-between">
+            <span>UTF-8 · C++20 · POSIX Clang</span>
+            <span className="text-zinc-400">{patchApplied ? '0 errors' : '1 error detected'}</span>
+          </div>
+        </div>
+
+        {/* Right Side: Kernova Diagnostic Synthesizer Pane */}
+        <div className="flex flex-col lg:col-span-4 bg-zinc-950/90 font-mono text-xs">
+          {/* Inspector Header & View Mode Switcher */}
+          <div className="flex items-center justify-between border-b border-zinc-850 bg-zinc-900/60 px-3 py-2 text-[11px]">
+            <div className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-cyan-400" />
+              <span className="font-bold text-zinc-200 uppercase tracking-wider">Kernova Synthesizer</span>
+            </div>
+
             <button
-              onClick={() => setActiveTab('synthesis')}
-              className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${
-                activeTab === 'synthesis'
-                  ? 'bg-zinc-800 text-zinc-100 shadow-xs'
+              onClick={handleCopy}
+              className="flex items-center gap-1 px-2 py-0.5 rounded border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-zinc-200 transition-colors"
+            >
+              {copied ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+              <span>{copied ? 'Copied' : 'Copy'}</span>
+            </button>
+          </div>
+
+          {/* Mode Selector Tabs */}
+          <div className="flex items-center border-b border-zinc-850 bg-zinc-900/30 px-2 py-1 gap-1 overflow-x-auto text-[11px]">
+            <button
+              onClick={() => setActiveTab('diagnosis')}
+              className={`px-2.5 py-1 rounded transition-colors whitespace-nowrap ${
+                activeTab === 'diagnosis'
+                  ? 'bg-zinc-800 text-white font-medium shadow-xs'
                   : 'text-zinc-400 hover:text-zinc-200'
               }`}
             >
-              Decoded Diagnostic
+              Decoded Cause
             </button>
             <button
-              onClick={() => setActiveTab('stream')}
-              className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${
-                activeTab === 'stream'
-                  ? 'bg-zinc-800 text-zinc-100 shadow-xs'
+              onClick={() => setActiveTab('diff')}
+              className={`px-2.5 py-1 rounded transition-colors whitespace-nowrap ${
+                activeTab === 'diff'
+                  ? 'bg-zinc-800 text-white font-medium shadow-xs'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+            >
+              Remediation Diff
+            </button>
+            <button
+              onClick={() => setActiveTab('raw')}
+              className={`px-2.5 py-1 rounded transition-colors whitespace-nowrap ${
+                activeTab === 'raw'
+                  ? 'bg-zinc-800 text-white font-medium shadow-xs'
                   : 'text-zinc-400 hover:text-zinc-200'
               }`}
             >
               Raw Stream
             </button>
             <button
-              onClick={() => setActiveTab('diff')}
-              className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${
-                activeTab === 'diff'
-                  ? 'bg-zinc-800 text-zinc-100 shadow-xs'
+              onClick={() => setActiveTab('graph')}
+              className={`px-2.5 py-1 rounded transition-colors whitespace-nowrap ${
+                activeTab === 'graph'
+                  ? 'bg-zinc-800 text-white font-medium shadow-xs'
                   : 'text-zinc-400 hover:text-zinc-200'
               }`}
             >
-              Remediation Diff
+              Build Graph
             </button>
           </div>
 
-          <button
-            onClick={handleCopy}
-            className="flex items-center gap-1 rounded border border-zinc-800 bg-zinc-900 px-2 py-1 text-[11px] font-medium text-zinc-400 hover:text-zinc-200 transition-colors"
-            title="Copy view content"
-          >
-            {copied ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
-            <span>{copied ? 'Copied' : 'Copy'}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Main Terminal Viewport */}
-      <div className="p-4 sm:p-5 font-mono text-xs">
-        {/* TAB 1: Decoded Diagnostic (Primary Visual Storytelling) */}
-        {activeTab === 'synthesis' && (
-          <div className="space-y-4">
-            {/* Demystified Banner */}
-            <div className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-4">
-              <div className="flex items-start gap-3">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-amber-500/10 text-amber-400 text-xs font-bold">
-                  !
-                </span>
-                <div className="space-y-1.5 flex-1">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="font-semibold text-zinc-100 text-sm">
-                      {scenario.diagnosis.title}
-                    </span>
-                    <span className="text-[11px] text-zinc-500 uppercase tracking-wider font-mono">
-                      AST Semantic Match
-                    </span>
+          {/* Inspector Content Body */}
+          <div className="p-3.5 flex-1 overflow-y-auto space-y-3.5">
+            {activeTab === 'diagnosis' && (
+              <div className="space-y-3">
+                <div className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-3">
+                  <div className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                    Isolated Cause
                   </div>
-                  <p className="text-zinc-300 font-sans text-xs leading-relaxed">
-                    {scenario.diagnosis.description}
+                  <div className="mt-1 text-sm font-bold text-zinc-100">
+                    {scenario.diagnostic.title}
+                  </div>
+                  <p className="mt-1.5 font-sans text-xs leading-relaxed text-zinc-300">
+                    {scenario.diagnostic.rootCause}
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-zinc-850 bg-zinc-900/30 p-3">
+                  <div className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                    AST Declaration Origin
+                  </div>
+                  <div className="mt-1 font-mono text-[11px] text-cyan-300 break-all">
+                    {scenario.diagnostic.astNode}
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-zinc-850 bg-zinc-900/30 p-3">
+                  <div className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                    Actionable Remediation
+                  </div>
+                  <p className="mt-1 font-sans text-xs leading-relaxed text-zinc-300">
+                    {scenario.diagnostic.recommendation}
                   </p>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* AST Context & Recommended Action Grid */}
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <div className="rounded-lg border border-zinc-850 bg-zinc-900/30 p-3.5">
-                <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
-                  AST Definition Node
-                </div>
-                <div className="mt-1.5 text-zinc-300 font-mono text-[11px] break-all">
-                  {scenario.diagnosis.astLocation}
-                </div>
-              </div>
-
-              <div className="rounded-lg border border-zinc-850 bg-zinc-900/30 p-3.5">
-                <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
-                  Recommended Action
-                </div>
-                <div className="mt-1.5 text-zinc-300 font-sans text-xs leading-relaxed">
-                  {scenario.diagnosis.resolution}
-                </div>
-              </div>
-            </div>
-
-            {/* Inline Diff Preview */}
-            <div className="rounded-lg border border-zinc-800 bg-zinc-950 p-3.5">
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-2">
-                Proposed Patch Diff
-              </div>
-              <div className="space-y-0.5 font-mono text-xs">
-                {scenario.diffLines.map((line, idx) => (
-                  <div
-                    key={idx}
-                    className={`flex items-start gap-3 px-2 py-0.5 rounded-sm ${
-                      line.type === 'add'
-                        ? 'bg-emerald-950/40 text-emerald-300'
-                        : line.type === 'delete'
-                        ? 'bg-rose-950/40 text-rose-300'
-                        : line.type === 'header'
-                        ? 'text-zinc-500 font-semibold'
-                        : 'text-zinc-400'
-                    }`}
+            {activeTab === 'diff' && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-[11px] text-zinc-400">
+                  <span>Proposed Patch Diff</span>
+                  <button
+                    onClick={() => setPatchApplied(!patchApplied)}
+                    className="text-cyan-400 hover:underline"
                   >
-                    <span className="w-6 shrink-0 select-none text-zinc-600 text-right">
-                      {line.lineNumber || ''}
-                    </span>
-                    <span className="whitespace-pre flex-1">{line.content}</span>
+                    {patchApplied ? 'Revert Patch' : 'Apply in Editor'}
+                  </button>
+                </div>
+
+                <div className="rounded-lg border border-zinc-850 bg-zinc-950 p-2.5 font-mono text-[11px] leading-relaxed space-y-0.5">
+                  {scenario.diff.map((d, idx) => (
+                    <div
+                      key={idx}
+                      className={`px-1.5 py-0.5 rounded ${
+                        d.type === 'add'
+                          ? 'bg-emerald-950/60 text-emerald-300'
+                          : d.type === 'delete'
+                          ? 'bg-rose-950/60 text-rose-300'
+                          : d.type === 'header'
+                          ? 'text-zinc-500 font-semibold'
+                          : 'text-zinc-400'
+                      }`}
+                    >
+                      <span className="whitespace-pre">{d.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'raw' && (
+              <div className="space-y-2">
+                <div className="text-[11px] text-zinc-400">
+                  Raw Compiler Stream (Clang / GCC stderr)
+                </div>
+                <div className="rounded-lg border border-zinc-850 bg-zinc-950 p-3 font-mono text-[11px] leading-relaxed text-zinc-300 space-y-1 overflow-x-auto">
+                  {scenario.rawStream.map((line, idx) => (
+                    <div
+                      key={idx}
+                      className={
+                        line.includes('error:')
+                          ? 'text-rose-400 font-semibold'
+                          : line.includes('note:')
+                          ? 'text-zinc-400'
+                          : line.includes('warning:')
+                          ? 'text-amber-400'
+                          : 'text-zinc-300'
+                      }
+                    >
+                      {line}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'graph' && (
+              <div className="space-y-3">
+                <div className="text-[11px] text-zinc-400">
+                  Ninja Target Critical Path Profiler
+                </div>
+
+                {scenario.buildMetrics && (
+                  <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-zinc-400">Bottleneck:</span>
+                      <span className="font-bold text-amber-300">{scenario.buildMetrics.bottleneckTarget}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-zinc-400">Latency:</span>
+                      <span className="font-bold text-zinc-200">{scenario.buildMetrics.latency}</span>
+                    </div>
+                    <div className="border-t border-zinc-800 pt-2 text-[11px] text-zinc-400 leading-relaxed font-sans">
+                      {scenario.buildMetrics.overheadReason}
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
+                )}
 
-        {/* TAB 2: Raw Compiler Stream */}
-        {activeTab === 'stream' && (
-          <div className="rounded-lg border border-zinc-850 bg-zinc-950 p-4 font-mono text-xs leading-relaxed text-zinc-300 overflow-x-auto space-y-1">
-            {scenario.rawError.map((line, idx) => (
-              <div
-                key={idx}
-                className={
-                  line.includes('error:')
-                    ? 'text-rose-400 font-semibold'
-                    : line.includes('note:')
-                    ? 'text-zinc-400'
-                    : line.includes('warning:')
-                    ? 'text-amber-400'
-                    : 'text-zinc-300'
-                }
-              >
-                {line}
+                <div className="space-y-1.5 font-mono text-[11px]">
+                  <div className="flex items-center justify-between text-zinc-400">
+                    <span>Target Execution Timeline</span>
+                    <span>Elapsed: 48.2s</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-zinc-800 overflow-hidden flex">
+                    <div className="bg-amber-500 w-[62%]" title="engine_core serial wait (62%)" />
+                    <div className="bg-cyan-500 w-[24%]" title="codegen.cpp.o (24%)" />
+                    <div className="bg-zinc-600 w-[14%]" title="other targets (14%)" />
+                  </div>
+                  <div className="flex justify-between text-[10px] text-zinc-500">
+                    <span>0.0s</span>
+                    <span>24.0s</span>
+                    <span>48.2s</span>
+                  </div>
+                </div>
               </div>
-            ))}
+            )}
           </div>
-        )}
-
-        {/* TAB 3: Full Diff View */}
-        {activeTab === 'diff' && (
-          <div className="rounded-lg border border-zinc-850 bg-zinc-950 p-4 font-mono text-xs leading-relaxed overflow-x-auto space-y-1">
-            {scenario.diffLines.map((line, idx) => (
-              <div
-                key={idx}
-                className={`flex items-start gap-4 px-2 py-0.5 rounded-sm ${
-                  line.type === 'add'
-                    ? 'bg-emerald-950/40 text-emerald-300'
-                    : line.type === 'delete'
-                    ? 'bg-rose-950/40 text-rose-300'
-                    : line.type === 'header'
-                    ? 'text-zinc-500 font-semibold'
-                    : 'text-zinc-400'
-                }`}
-              >
-                <span className="w-8 shrink-0 select-none text-zinc-600 text-right">
-                  {line.lineNumber || ''}
-                </span>
-                <span className="whitespace-pre">{line.content}</span>
-              </div>
-            ))}
-          </div>
-        )}
+        </div>
       </div>
 
-      {/* Honest Prototype Footer Note */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-zinc-850 bg-zinc-900/60 px-4 py-2 text-[11px] text-zinc-500 font-mono">
+      {/* Honest Prototype Footer Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-zinc-850 bg-zinc-900/70 px-4 py-2 text-[11px] text-zinc-500 font-mono">
         <div className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-violet-500" />
-          <span>SAMPLE DATA · CONCEPTUAL PROTOTYPE</span>
+          <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
+          <span className="text-zinc-400">CONCEPT DEMONSTRATION · DETERMINISTIC SAMPLE DATA</span>
         </div>
-        <span>Simulated Clang 18 & GCC 14 structured diagnostic output</span>
+        <span className="text-zinc-500">Simulated Clang 18 AST diagnostic & Ninja build stream</span>
       </div>
     </div>
   );

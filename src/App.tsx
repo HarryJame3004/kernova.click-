@@ -1,18 +1,29 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
-import { HomePage } from './pages/HomePage';
-import { ProductPage } from './pages/ProductPage';
-import { TechnologyPage } from './pages/TechnologyPage';
-import { AboutPage } from './pages/AboutPage';
-import { RoadmapPage } from './pages/RoadmapPage';
-import { ContactPage } from './pages/ContactPage';
-import { PrivacyPage } from './pages/PrivacyPage';
-import { TermsPage } from './pages/TermsPage';
 import { ArrowLeft } from 'lucide-react';
 import { SEOHead } from './components/ui/SEOHead';
+
+// Code-split pages for performance
+const HomePage = lazy(() => import('./pages/HomePage').then((m) => ({ default: m.HomePage })));
+const ProductPage = lazy(() => import('./pages/ProductPage').then((m) => ({ default: m.ProductPage })));
+const TechnologyPage = lazy(() => import('./pages/TechnologyPage').then((m) => ({ default: m.TechnologyPage })));
+const AboutPage = lazy(() => import('./pages/AboutPage').then((m) => ({ default: m.AboutPage })));
+const RoadmapPage = lazy(() => import('./pages/RoadmapPage').then((m) => ({ default: m.RoadmapPage })));
+const ContactPage = lazy(() => import('./pages/ContactPage').then((m) => ({ default: m.ContactPage })));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then((m) => ({ default: m.PrivacyPage })));
+const TermsPage = lazy(() => import('./pages/TermsPage').then((m) => ({ default: m.TermsPage })));
+
+const PageLoadingFallback: React.FC = () => (
+  <div className="flex min-h-[50vh] items-center justify-center p-8">
+    <div className="flex items-center gap-3 font-mono text-xs text-zinc-500">
+      <span className="h-2 w-2 rounded-full bg-cyan-400 animate-ping" />
+      <span>Loading workspace...</span>
+    </div>
+  </div>
+);
 
 const NotFoundPage: React.FC = () => (
   <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
@@ -40,20 +51,22 @@ export default function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
-        <div className="min-h-screen flex flex-col bg-white text-zinc-900 transition-colors duration-150 dark:bg-zinc-950 dark:text-zinc-100">
+        <div className="min-h-screen flex flex-col bg-zinc-950 text-zinc-100 transition-colors duration-150">
           <Navbar />
           <main className="flex-1">
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/product" element={<ProductPage />} />
-              <Route path="/technology" element={<TechnologyPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/roadmap" element={<RoadmapPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/privacy" element={<PrivacyPage />} />
-              <Route path="/terms" element={<TermsPage />} />
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
+            <Suspense fallback={<PageLoadingFallback />}>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/product" element={<ProductPage />} />
+                <Route path="/technology" element={<TechnologyPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/roadmap" element={<RoadmapPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
+                <Route path="/terms" element={<TermsPage />} />
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            </Suspense>
           </main>
           <Footer />
         </div>
